@@ -6,7 +6,13 @@
     ],
     "type": "flarum-extension",
     "license": "MIT",
+    "support": {
+        "issues": "https://github.com/huseyinfiliz/rewind/issues",
+        "source": "https://github.com/huseyinfiliz/rewind",
+        "forum": "https://discuss.flarum.org/d/38832"
+    },
     "require": {
+        "php": "^8.1",
         "flarum/core": "^2.0"
     },
     "authors": [
@@ -46,7 +52,7 @@
                 "bundlewatch": false,
                 "frontendTesting": true,
                 "backendTesting": true,
-                "phpstan": false,
+                "phpstan": true,
                 "editorConfig": true,
                 "styleci": true
             }
@@ -66,15 +72,18 @@
         ],
         "test:unit": "phpunit -c tests/phpunit.unit.xml",
         "test:integration": "phpunit -c tests/phpunit.integration.xml",
-        "test:setup": "@php tests/integration/setup.php"
+        "test:setup": "@php tests/integration/setup.php",
+        "analyse:phpstan": "phpstan analyse"
     },
     "scripts-descriptions": {
         "test": "Runs all tests.",
         "test:unit": "Runs all unit tests.",
         "test:integration": "Runs all integration tests.",
-        "test:setup": "Sets up a database for use with integration tests. Execute this only once."
+        "test:setup": "Sets up a database for use with integration tests. Execute this only once.",
+        "analyse:phpstan": "Runs static code analysis using PHPStan."
     },
     "require-dev": {
-        "flarum/testing": "^2.0"
+        "flarum/testing": "^2.0",
+        "flarum/phpstan": "*"
     }
 }
