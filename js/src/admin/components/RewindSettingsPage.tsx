@@ -145,8 +145,6 @@ export default class RewindSettingsPage extends ExtensionPage {
     );
   }
 
-  // --- Slides Tab ---
-
   slidesTab(): Mithril.Children {
     return (
       <Form>
@@ -203,7 +201,7 @@ export default class RewindSettingsPage extends ExtensionPage {
         {sections.map((section) => {
           const isExpanded = this.expandedSections.has(section.key);
           return (
-            <div className={'RewindSettings-accordion' + (isExpanded ? ' RewindSettings-accordion--open' : '')}>
+            <div className={'RewindSettings-accordion' + (isExpanded ? ' RewindSettings-accordion--open' : '')} key={section.key}>
               <button className="RewindSettings-accordionHeader" type="button" onclick={() => this.toggleSection(section.key)}>
                 <i className={section.icon + ' RewindSettings-accordionIcon'} />
                 <span className="RewindSettings-accordionTitle">{app.translator.trans(section.label)}</span>
@@ -234,8 +232,6 @@ export default class RewindSettingsPage extends ExtensionPage {
       this.expandedSections.add(key);
     }
   }
-
-  // --- Advanced Tab ---
 
   advancedTab(): Mithril.Children {
     return (
@@ -268,28 +264,37 @@ export default class RewindSettingsPage extends ExtensionPage {
   }
 
   async loadGroupOptions(): Promise<Array<{ value: any; label: string }>> {
-    const response = await app.request<{ groups: Array<{ id: number; namePlural: string; count: number }> }>({
-      method: 'POST',
-      url: app.forum.attribute('apiUrl') + '/rw-snaps/groups',
-    });
     const options: Array<{ value: any; label: string }> = [
       { value: '', label: app.translator.trans('huseyinfiliz-rewind.admin.generate_modal.all_users') as string },
     ];
-    for (const g of response.groups || []) {
-      options.push({ value: String(g.id), label: `${g.namePlural} (${g.count})` });
+    try {
+      const response = await app.request<{ groups: Array<{ id: number; namePlural: string; count: number }> }>({
+        method: 'POST',
+        url: app.forum.attribute('apiUrl') + '/rw-snaps/groups',
+      });
+      for (const g of response.groups || []) {
+        options.push({ value: String(g.id), label: `${g.namePlural} (${g.count})` });
+      }
+    } catch (e) {
+      console.error('Failed to load group options', e);
     }
     return options;
   }
 
   async loadYearOptions(): Promise<Array<{ value: any; label: string }>> {
-    const response = await app.request<{ years: Array<{ year: number; count: number }> }>({
-      method: 'POST',
-      url: app.forum.attribute('apiUrl') + '/rw-snaps/year-stats',
-    });
-    return (response.years || []).map((y) => ({
-      value: String(y.year),
-      label: `${y.year} (${y.count} users)`,
-    }));
+    try {
+      const response = await app.request<{ years: Array<{ year: number; count: number }> }>({
+        method: 'POST',
+        url: app.forum.attribute('apiUrl') + '/rw-snaps/year-stats',
+      });
+      return (response.years || []).map((y) => ({
+        value: String(y.year),
+        label: `${y.year} (${y.count} users)`,
+      }));
+    } catch (e) {
+      console.error('Failed to load year options', e);
+      return [];
+    }
   }
 
   openCommunityGenerateModal() {

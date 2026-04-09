@@ -2,6 +2,7 @@ import app from 'flarum/forum/app';
 import Page from 'flarum/common/components/Page';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 import Avatar from 'flarum/common/components/Avatar';
+import extractText from 'flarum/common/utils/extractText';
 import { animate, stagger, createTimeline, random } from 'animejs';
 import { animateBignum } from '../animators/bignum';
 import { animateSpotlight } from '../animators/spotlight';
@@ -84,9 +85,9 @@ const LAYOUT_ANIMATORS: Record<string, (root: Element, tl: any, key?: string) =>
   'layout-emojis': (root, tl) => animateEmojis(root, tl),
 };
 
-function trans(key: string, params?: Record<string, any>): string {
-  const result = params ? app.translator.trans(key, params) : app.translator.trans(key);
-  return Array.isArray(result) ? result.join('') : (result as string);
+// Mithril VNodes (HTML barındıran çeviriler) ve stringleri güvenle döndürmek için
+function trans(key: string, params?: Record<string, any>): any {
+  return params ? app.translator.trans(key, params) : app.translator.trans(key);
 }
 
 function getTier(value: number, thresholds: number[]): number {
@@ -96,11 +97,10 @@ function getTier(value: number, thresholds: number[]): number {
   return 1;
 }
 
-function getContextualMessage(key: string, data: Record<string, any>, communityAvg?: Record<string, any>): string | null {
+function getContextualMessage(key: string, data: Record<string, any>, communityAvg?: Record<string, any>): any | null {
   const count = data.count ?? data.interaction_count ?? data.mention_count ?? 0;
   if (count <= 0) return null;
 
-  // Community comparison if available
   const avgMap: Record<string, string> = { post_count: 'posts', discussion_count: 'discussions', word_count: 'words' };
   if (communityAvg && avgMap[key]) {
     const avg = communityAvg[avgMap[key]];
@@ -118,7 +118,6 @@ function getContextualMessage(key: string, data: Record<string, any>, communityA
     }
   }
 
-  // Fallback to tier messages
   const tierKey = (k: string, tiers: number[]) => {
     const tier = getTier(count, tiers);
     return trans(`huseyinfiliz-rewind.forum.metrics.${k}.messages.tier_${tier}`) || null;
@@ -145,15 +144,13 @@ function getContextualMessage(key: string, data: Record<string, any>, communityA
   }
 }
 
-/** Convert a UTC hour (0-23) to the user's local hour. */
 function utcToLocalHour(utcHour: number): number {
   const now = new Date();
-  const offsetMinutes = now.getTimezoneOffset(); // e.g. -180 for UTC+3
+  const offsetMinutes = now.getTimezoneOffset();
   const localHour = (utcHour - offsetMinutes / 60 + 24) % 24;
   return Math.round(localHour) % 24;
 }
 
-/** Shift an array of 24 hourly counts from UTC to local timezone. */
 function shiftHourCounts(hourCounts: number[]): number[] {
   const shifted = new Array(24).fill(0);
   for (let utcH = 0; utcH < 24; utcH++) {
@@ -162,7 +159,7 @@ function shiftHourCounts(hourCounts: number[]): number[] {
   return shifted;
 }
 
-function plainDescription(key: string, data: Record<string, any>): string {
+function plainDescription(key: string, data: Record<string, any>): any {
   if (key === 'top_words' && !data.words?.length) return '';
   if (key === 'top_emojis' && !data.emojis?.length) return '';
   if (key === 'best_friend' || key === 'best_friend_mentions') return '';
@@ -194,25 +191,20 @@ function plainDescription(key: string, data: Record<string, any>): string {
   return trans(`huseyinfiliz-rewind.forum.metrics.${key}.description`, payload);
 }
 
-/** Get the emoji CDN base URL from flarum/emoji, or null if not installed. */
 function getEmojiCdnBase(): string | null {
   return app.forum.attribute<string>('flarum-emoji.cdn') || null;
 }
 
-/** Convert an emoji string to a CDN SVG URL. Returns null if flarum/emoji is not installed or sequence is invalid. */
 function emojiToCdnUrl(emoji: string): string | null {
   const base = getEmojiCdnBase();
   if (!base) return null;
 
   const allCodes = [...emoji].map((c) => c.codePointAt(0)!.toString(16));
-
-  // Fragments: real emojis never start with ZWJ or variation selectors
   const first = allCodes[0];
   if (first === '200d' || first === '20e3' || (parseInt(first, 16) >= 0xfe00 && parseInt(first, 16) <= 0xfe0f)) {
     return null;
   }
 
-  // Must have at least one visible emoji codepoint
   const visible = allCodes.filter((cp) => cp !== 'fe0f' && cp !== '200d' && cp !== '20e3');
   if (visible.length === 0) return null;
 
@@ -232,6 +224,7 @@ export default class SlideshowPage extends Page {
   slides: Array<{ type: string; key?: string; data?: any }> = [];
   touchStartX = 0;
   touchStartY = 0;
+  isDestroyed = false;
 
   isMetricEmpty(key: string, d: any): boolean {
     if (!d || (typeof d === 'object' && Object.keys(d).length === 0)) return true;
@@ -296,7 +289,6 @@ export default class SlideshowPage extends Page {
           this.slides = [{ type: 'intro' }, ...metricSlides, { type: 'summary' }];
         }
 
-        // Preload user models for friend/mention slides (for avatars)
         const userIds = [
           this.snapshotData!.best_friend?.user_id,
           this.snapshotData!.best_friend_mentions?.user_id,
@@ -304,24 +296,28 @@ export default class SlideshowPage extends Page {
         ].filter((id) => id && !app.store.getById('users', String(id)));
         const unique = [...new Set(userIds)];
         if (unique.length > 0) {
-          Promise.all(unique.map((uid) => app.store.find('users', String(uid)).catch(() => null))).then(() => m.redraw());
+          Promise.all(unique.map((uid) => app.store.find('users', String(uid)).catch(() => null))).then(() => {
+            if (!this.isDestroyed) m.redraw();
+          });
         }
       }
     } catch (e) {
       console.error('SlideshowPage: failed to load', e);
     }
     this.loading = false;
-    m.redraw();
+    if (!this.isDestroyed) m.redraw();
   }
 
   oncreate(vnode: Mithril.VnodeDOM) {
     super.oncreate(vnode);
+    this.isDestroyed = false;
     document.body.classList.add('RewindSlideshowPage-active');
     document.addEventListener('keydown', this.onKeyDown);
   }
 
   onremove(vnode: Mithril.VnodeDOM) {
     super.onremove(vnode);
+    this.isDestroyed = true;
     document.body.classList.remove('RewindSlideshowPage-active');
     document.removeEventListener('keydown', this.onKeyDown);
   }
@@ -376,6 +372,9 @@ export default class SlideshowPage extends Page {
     if (hint) tl.add(hint, { opacity: [0, 0.6], duration: 600 }, 1200);
 
     setTimeout(() => {
+      // Zombi DOM manipülasyonunu engellemek için güvenlik kontrolü
+      if (this.isDestroyed || !document.body.contains(root)) return;
+
       const burstContainer = document.createElement('div');
       burstContainer.className = 'rw-intro-burst';
       root.appendChild(burstContainer);
@@ -398,7 +397,7 @@ export default class SlideshowPage extends Page {
         duration: () => 800 + Math.random() * 600,
         ease: 'easeOutExpo',
         complete: () => {
-          if (root.contains(burstContainer)) root.removeChild(burstContainer);
+          if (!this.isDestroyed && root.contains(burstContainer)) root.removeChild(burstContainer);
         },
       });
     }, 700);
@@ -422,10 +421,8 @@ export default class SlideshowPage extends Page {
   animateMetricSlide(root: Element, key: string, layout: string) {
     const tl = createTimeline({ defaults: { ease: 'outExpo' } });
 
-    // Ambient shapes: fade in gently, then drift continuously
     const ambientShapes = root.querySelectorAll('.rw-ambient-shape');
     if (ambientShapes.length > 0) {
-      // Entrance fade
       animate(ambientShapes, {
         opacity: [0, 1],
         scale: [0.5, 1],
@@ -434,7 +431,6 @@ export default class SlideshowPage extends Page {
         ease: 'outExpo',
       });
 
-      // Continuous slow drift (starts alongside, position builds up smoothly)
       ambientShapes.forEach((shape) => {
         const dx = random(-60, 60);
         const dy = random(-60, 60);
@@ -480,7 +476,9 @@ export default class SlideshowPage extends Page {
     this.currentSlide++;
     m.redraw();
     setTimeout(() => {
+      if (this.isDestroyed) return;
       this.animating = false;
+      m.redraw();
     }, SLIDE_TRANSITION_MS);
   }
 
@@ -491,7 +489,9 @@ export default class SlideshowPage extends Page {
     this.currentSlide--;
     m.redraw();
     setTimeout(() => {
+      if (this.isDestroyed) return;
       this.animating = false;
+      m.redraw();
     }, SLIDE_TRANSITION_MS);
   }
 
@@ -519,7 +519,7 @@ export default class SlideshowPage extends Page {
   async togglePublic() {
     if (!this.snapshot) return;
     await this.snapshot.save({ isPublic: !this.snapshot.isPublic() });
-    m.redraw();
+    if (!this.isDestroyed) m.redraw();
   }
 
   renderAmbientShapes(): Mithril.Children {
@@ -542,7 +542,7 @@ export default class SlideshowPage extends Page {
       return (
         <div className="rw-slideshow">
           <div className="rw-slide rw-slide--intro">
-            <p style={{ color: '#fff' }}>{app.translator.trans('huseyinfiliz-rewind.forum.page.not_available')}</p>
+            <p style={{ color: '#fff' }}>{trans('huseyinfiliz-rewind.forum.page.not_available')}</p>
           </div>
         </div>
       );
@@ -612,7 +612,7 @@ export default class SlideshowPage extends Page {
         <div className="rw-intro-year">{year}</div>
         <div className="rw-intro-label">REWIND</div>
         <div className="rw-intro-divider" />
-        <div className="rw-intro-hint">{app.translator.trans('huseyinfiliz-rewind.forum.slideshow.tap_to_start')}</div>
+        <div className="rw-intro-hint">{trans('huseyinfiliz-rewind.forum.slideshow.tap_to_start')}</div>
       </div>
     );
   }
@@ -646,7 +646,7 @@ export default class SlideshowPage extends Page {
     const description = plainDescription(key, data);
     const message = getContextualMessage(key, data, this.snapshotData?._community_avg);
     const icon = METRIC_ICONS[key] || 'fas fa-chart-line';
-    const title = app.translator.trans(`huseyinfiliz-rewind.forum.metrics.${key}.title`);
+    const title = trans(`huseyinfiliz-rewind.forum.metrics.${key}.title`);
 
     if (layout === 'layout-words') return this.renderWordsSlide(data);
     if (layout === 'layout-emojis') return this.renderEmojisSlide(data);
@@ -671,7 +671,6 @@ export default class SlideshowPage extends Page {
       mainContent = this.renderBadgesContent(data);
     }
 
-    // Unified layout: title+desc always on top, content in center
     return (
       <div className={`rw-metric-slide rw-metric-slide--${layout}`}>
         {this.renderAmbientShapes()}
@@ -819,20 +818,14 @@ export default class SlideshowPage extends Page {
 
     const toRad = (deg: number) => (deg * Math.PI) / 180;
 
-    // Hour hand angle: center of the peak hour's bar segment
-    // Each hour = 15°, offset by half a segment so hand points to bar center
     const hourAngleFinal = ((localPeakHour + 0.5) / 24) * 360 - 90;
-    // Minute hand always at 12 o'clock = -90°
     const minuteAngleFinal = -90;
 
-    // Hour hand endpoint
     const hourX = CENTER + HOUR_HAND_LEN * Math.cos(toRad(hourAngleFinal));
     const hourY = CENTER + HOUR_HAND_LEN * Math.sin(toRad(hourAngleFinal));
-    // Minute hand endpoint
     const minuteX = CENTER + MINUTE_HAND_LEN * Math.cos(toRad(minuteAngleFinal));
     const minuteY = CENTER + MINUTE_HAND_LEN * Math.sin(toRad(minuteAngleFinal));
 
-    // Build bar paths
     const barPaths = localCounts.map((count, h) => {
       const ratio = count > 0 ? Math.max(count / maxCount, MIN_BAR_RATIO) : MIN_BAR_RATIO;
       const barLen = INNER_R + (OUTER_R - INNER_R) * ratio;
@@ -878,13 +871,9 @@ export default class SlideshowPage extends Page {
             <circle cx={CENTER} cy={CENTER} r={INNER_R} className="rw-clock-inner-ring" />
             {barPaths}
 
-            {/* Clock hands inside inner circle */}
             <g className="rw-clock-hands" data-hour-angle={hourAngleFinal} data-minute-angle={minuteAngleFinal}>
-              {/* Minute hand (longer, thinner) → 00:00 */}
               <line x1={CENTER} y1={CENTER} x2={minuteX} y2={minuteY} className="rw-clock-hand rw-clock-hand--minute" />
-              {/* Hour hand (shorter, thicker) → peak hour */}
               <line x1={CENTER} y1={CENTER} x2={hourX} y2={hourY} className="rw-clock-hand rw-clock-hand--hour" />
-              {/* Center dot */}
               <circle cx={CENTER} cy={CENTER} r={3} className="rw-clock-center-dot" />
             </g>
           </svg>
@@ -941,7 +930,6 @@ export default class SlideshowPage extends Page {
     const friend = data.user_id ? app.store.getById('users', String(data.user_id)) : null;
     const owner = this.snapshot?.user() || null;
 
-    // Best friend: show overlapping avatars + interaction stats
     if (key === 'best_friend') {
       const stats = [
         { icon: 'fas fa-heart', label: trans('huseyinfiliz-rewind.forum.metrics.best_friend.stat_likes_received'), value: data.likes_received || 0 },
@@ -972,7 +960,7 @@ export default class SlideshowPage extends Page {
               <div className="rw-person-stat" key={i} style={{ opacity: 0 }}>
                 <i className={s.icon} />
                 <span className="rw-person-stat-val">{s.value}</span>
-                <span className="rw-person-stat-lbl">{s.label}</span>
+                <span className="rw-person-stat-lbl">{s.label as string}</span>
               </div>
             ))}
           </div>
@@ -980,7 +968,6 @@ export default class SlideshowPage extends Page {
       );
     }
 
-    // Mentions slide: bidirectional
     if (key === 'best_friend_mentions') {
       const mentionedByUser = data.mentioned_by_user_id ? app.store.getById('users', String(data.mentioned_by_user_id)) : null;
 
@@ -1018,7 +1005,6 @@ export default class SlideshowPage extends Page {
       );
     }
 
-    // Generic fallback
     return (
       <div className="rw-person-layout">
         <div className="rw-person-avatar" style={{ opacity: 0 }}>
@@ -1060,7 +1046,7 @@ export default class SlideshowPage extends Page {
     return (
       <div className="rw-words-slide">
         <div className="rw-slide-header">
-          <div className="rw-slide-label rw-slide-label--lg">{app.translator.trans('huseyinfiliz-rewind.forum.metrics.top_words.title')}</div>
+          <div className="rw-slide-label rw-slide-label--lg">{trans('huseyinfiliz-rewind.forum.metrics.top_words.title')}</div>
           <div className="rw-slide-desc">{plainDescription('top_words', data)}</div>
         </div>
         <div className="rw-words-cloud">
@@ -1093,7 +1079,6 @@ export default class SlideshowPage extends Page {
           alt={emoji}
           draggable={false}
           onerror={(ev: Event) => {
-            // Fallback to native if CDN image fails
             const img = ev.target as HTMLImageElement;
             const span = document.createElement('span');
             span.className = 'rw-emoji-char';
@@ -1111,7 +1096,7 @@ export default class SlideshowPage extends Page {
     return (
       <div className="rw-emojis-slide">
         <div className="rw-slide-header">
-          <div className="rw-slide-label rw-slide-label--lg">{app.translator.trans('huseyinfiliz-rewind.forum.metrics.top_emojis.title')}</div>
+          <div className="rw-slide-label rw-slide-label--lg">{trans('huseyinfiliz-rewind.forum.metrics.top_emojis.title')}</div>
           <div className="rw-slide-desc">{plainDescription('top_emojis', data)}</div>
         </div>
         <div className="rw-emoji-grid">
@@ -1138,35 +1123,33 @@ export default class SlideshowPage extends Page {
 
     return (
       <div className="rw-summary-slide" onclick={(e: Event) => e.stopPropagation()}>
-        <div className="rw-summary-title">
-          {app.translator.trans('huseyinfiliz-rewind.forum.slideshow.summary_title', { year: this.snapshot?.year() })}
-        </div>
+        <div className="rw-summary-title">{trans('huseyinfiliz-rewind.forum.slideshow.summary_title', { year: this.snapshot?.year() })}</div>
         <div className="rw-summary-grid">
           {keys.map((key) => (
             <div className={`rw-summary-card rw-summary-card--${key}`} key={key} style={{ opacity: 0 }}>
               <i className={METRIC_ICONS[key] || 'fas fa-chart-line'} />
               <div className="rw-summary-val">{this.renderSummaryValue(key, data[key])}</div>
-              <div className="rw-summary-lbl">{app.translator.trans(`huseyinfiliz-rewind.forum.metrics.${key}.title`)}</div>
+              <div className="rw-summary-lbl">{trans(`huseyinfiliz-rewind.forum.metrics.${key}.title`)}</div>
             </div>
           ))}
         </div>
         <div className="rw-summary-actions">
           <button className="rw-summary-action-card" onclick={() => this.share()}>
             <i className="fas fa-share-alt" />
-            <span>{app.translator.trans('huseyinfiliz-rewind.forum.slideshow.share')}</span>
+            <span>{trans('huseyinfiliz-rewind.forum.slideshow.share')}</span>
           </button>
           {isOwner && (
             <button className="rw-summary-action-card" onclick={() => this.togglePublic()}>
               <span className={`rw-visibility-pill ${this.snapshot.isPublic() ? 'rw-visibility-pill--public' : 'rw-visibility-pill--private'}`}>
                 <i className={this.snapshot.isPublic() ? 'fas fa-eye' : 'fas fa-eye-slash'} />
                 {this.snapshot.isPublic()
-                  ? app.translator.trans('huseyinfiliz-rewind.forum.slideshow.visibility_status_public')
-                  : app.translator.trans('huseyinfiliz-rewind.forum.slideshow.visibility_status_private')}
+                  ? trans('huseyinfiliz-rewind.forum.slideshow.visibility_status_public')
+                  : trans('huseyinfiliz-rewind.forum.slideshow.visibility_status_private')}
               </span>
               <span className="rw-visibility-hint">
                 {this.snapshot.isPublic()
-                  ? app.translator.trans('huseyinfiliz-rewind.forum.slideshow.visibility_tap_hide')
-                  : app.translator.trans('huseyinfiliz-rewind.forum.slideshow.visibility_tap_show')}
+                  ? trans('huseyinfiliz-rewind.forum.slideshow.visibility_tap_hide')
+                  : trans('huseyinfiliz-rewind.forum.slideshow.visibility_tap_show')}
               </span>
             </button>
           )}
@@ -1183,7 +1166,7 @@ export default class SlideshowPage extends Page {
       } catch {}
     } else if (navigator.clipboard) {
       await navigator.clipboard.writeText(url);
-      app.alerts.show({ type: 'success' }, app.translator.trans('huseyinfiliz-rewind.forum.slideshow.link_copied'));
+      app.alerts.show({ type: 'success' }, extractText(trans('huseyinfiliz-rewind.forum.slideshow.link_copied')));
     }
   }
 

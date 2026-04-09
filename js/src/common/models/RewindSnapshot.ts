@@ -1,35 +1,14 @@
 import Model from 'flarum/common/Model';
+import User from 'flarum/common/models/User';
 
 export default class RewindSnapshot extends Model {
-  year() {
-    return Model.attribute<number>('year').call(this);
-  }
+  year = Model.attribute<number>('year');
+  snapshotData = Model.attribute<Record<string, any>>('data');
+  generatedAt = Model.attribute('generatedAt', Model.transformDate);
+  isPublic = Model.attribute<boolean>('isPublic');
+  canEdit = Model.attribute<boolean>('canEdit');
+  canModerate = Model.attribute<boolean>('canModerate');
+  isEmpty = Model.attribute<boolean>('isEmpty');
 
-  snapshotData() {
-    return Model.attribute<Record<string, any>>('data').call(this);
-  }
-
-  generatedAt() {
-    return Model.attribute('generatedAt', Model.transformDate).call(this);
-  }
-
-  isPublic() {
-    return Model.attribute<boolean>('isPublic').call(this);
-  }
-
-  canEdit() {
-    return Model.attribute<boolean>('canEdit').call(this);
-  }
-
-  canModerate() {
-    return Model.attribute<boolean>('canModerate').call(this);
-  }
-
-  isEmpty() {
-    return Model.attribute<boolean>('isEmpty').call(this);
-  }
-
-  user() {
-    return Model.hasOne('user').call(this);
-  }
+  user = Model.hasOne<User>('user');
 }

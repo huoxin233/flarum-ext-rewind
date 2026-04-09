@@ -2,13 +2,14 @@ import app from 'flarum/forum/app';
 import Page from 'flarum/common/components/Page';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 import Avatar from 'flarum/common/components/Avatar';
+import extractText from 'flarum/common/utils/extractText';
 import { animate, stagger, createTimeline } from 'animejs';
 import { animateClock } from '../animators/clock';
 import type Mithril from 'mithril';
 
-function trans(key: string, params?: Record<string, any>): string {
-  const result = params ? app.translator.trans(key, params) : app.translator.trans(key);
-  return Array.isArray(result) ? result.join('') : (result as string);
+// Çevirilerdeki HTML (VNode) etiketlerini bozmadan döndürmek için
+function trans(key: string, params?: Record<string, any>): any {
+  return params ? app.translator.trans(key, params) : app.translator.trans(key);
 }
 
 const MONTH_NAMES = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -55,6 +56,7 @@ export default class CommunitySlideshow extends Page {
   animating = false;
   slides: Slide[] = [];
   touchStartX = 0;
+  isDestroyed = false;
 
   oninit(vnode: Mithril.Vnode) {
     super.oninit(vnode);
@@ -78,7 +80,6 @@ export default class CommunitySlideshow extends Page {
       this.snapshot = results[0] || null;
       this.data = this.snapshot?.snapshotData() || null;
 
-      // Try loading previous year for comparison
       try {
         const prevResponse = await app.store.find('rw-community', { filter: { year: year - 1 } } as any);
         const prevResults = Array.isArray(prevResponse) ? prevResponse : [prevResponse];
@@ -124,7 +125,6 @@ export default class CommunitySlideshow extends Page {
           this.slides = [{ type: 'intro' }, ...metricSlides, { type: 'summary' }];
         }
 
-        // Preload user models for avatars
         const userIds: number[] = [];
         this.data.top_contributors?.users?.forEach((u: any) => userIds.push(u.user_id));
         this.data.most_loved?.users?.forEach((u: any) => userIds.push(u.user_id));
@@ -137,26 +137,29 @@ export default class CommunitySlideshow extends Page {
 
         const unique = [...new Set(userIds)].filter((id) => id && !app.store.getById('users', String(id)));
 
-        // Load users in background — don't block slideshow
         if (unique.length > 0) {
-          Promise.all(unique.map((uid) => app.store.find('users', String(uid)).catch(() => null))).then(() => m.redraw());
+          Promise.all(unique.map((uid) => app.store.find('users', String(uid)).catch(() => null))).then(() => {
+            if (!this.isDestroyed) m.redraw();
+          });
         }
       }
     } catch (e) {
       console.error('CommunitySlideshow: failed to load', e);
     }
     this.loading = false;
-    m.redraw();
+    if (!this.isDestroyed) m.redraw();
   }
 
   oncreate(vnode: Mithril.VnodeDOM) {
     super.oncreate(vnode);
+    this.isDestroyed = false;
     document.body.classList.add('RewindSlideshowPage-active');
     document.addEventListener('keydown', this.onKeyDown);
   }
 
   onremove(vnode: Mithril.VnodeDOM) {
     super.onremove(vnode);
+    this.isDestroyed = true;
     document.body.classList.remove('RewindSlideshowPage-active');
     document.removeEventListener('keydown', this.onKeyDown);
   }
@@ -180,7 +183,6 @@ export default class CommunitySlideshow extends Page {
     const slide = this.slides[this.currentSlide];
     if (!slide) return;
 
-    // Each slide type gets ONE dedicated animation path — no overlap
     if (slide.type === 'intro') {
       this.animateIntroSlide(root);
       return;
@@ -190,7 +192,6 @@ export default class CommunitySlideshow extends Page {
       return;
     }
 
-    // Metric slides: header first, then slide-specific content
     this.animateHeader(root);
 
     switch (slide.key) {
@@ -319,7 +320,9 @@ export default class CommunitySlideshow extends Page {
     this.currentSlide++;
     m.redraw();
     setTimeout(() => {
+      if (this.isDestroyed) return;
       this.animating = false;
+      m.redraw();
     }, SLIDE_TRANSITION_MS);
   }
 
@@ -330,7 +333,9 @@ export default class CommunitySlideshow extends Page {
     this.currentSlide--;
     m.redraw();
     setTimeout(() => {
+      if (this.isDestroyed) return;
       this.animating = false;
+      m.redraw();
     }, SLIDE_TRANSITION_MS);
   }
 
@@ -364,7 +369,7 @@ export default class CommunitySlideshow extends Page {
       return (
         <div className="rw-slideshow">
           <div className="rw-slide rw-slide--intro">
-            <p style={{ color: '#fff' }}>{trans('huseyinfiliz-rewind.forum.slideshow.not_available')}</p>
+            <p style={{ color: '#fff' }}>{trans('huseyinfiliz-rewind.forum.slideshow.not_available') as string}</p>
           </div>
         </div>
       );
@@ -456,7 +461,6 @@ export default class CommunitySlideshow extends Page {
 
   renderIntro(): Mithril.Children {
     const year = this.snapshot?.year() || '';
-    const forumTitle = app.forum.attribute('title') || '';
     return (
       <div className="rw-intro-slide">
         <div className="rw-intro-orbs" />
@@ -857,45 +861,49 @@ export default class CommunitySlideshow extends Page {
       items.push({
         icon: 'fas fa-comment',
         value: d.total_posts.count.toLocaleString(),
-        label: trans('huseyinfiliz-rewind.forum.community_slideshow.posts'),
+        label: trans('huseyinfiliz-rewind.forum.community_slideshow.posts') as string,
       });
     if (d.total_discussions?.count > 0)
       items.push({
         icon: 'fas fa-comments',
         value: d.total_discussions.count.toLocaleString(),
-        label: trans('huseyinfiliz-rewind.forum.community_slideshow.discussions'),
+        label: trans('huseyinfiliz-rewind.forum.community_slideshow.discussions') as string,
       });
     if (d.new_users?.count > 0)
       items.push({
         icon: 'fas fa-user-plus',
         value: d.new_users.count.toLocaleString(),
-        label: trans('huseyinfiliz-rewind.forum.community_slideshow.new_members'),
+        label: trans('huseyinfiliz-rewind.forum.community_slideshow.new_members') as string,
       });
     if (d.total_words?.total_words > 0)
       items.push({
         icon: 'fas fa-book',
         value: d.total_words.total_words.toLocaleString(),
-        label: trans('huseyinfiliz-rewind.forum.community_slideshow.words'),
+        label: trans('huseyinfiliz-rewind.forum.community_slideshow.words') as string,
       });
     if (d.most_active_user?.username)
       items.push({
         icon: 'fas fa-trophy',
         value: d.most_active_user.username,
-        label: trans('huseyinfiliz-rewind.forum.community_slideshow.top_contributor_label'),
+        label: trans('huseyinfiliz-rewind.forum.community_slideshow.top_contributor_label') as string,
       });
     if (d.top_tag?.name)
-      items.push({ icon: 'fas fa-hashtag', value: d.top_tag.name, label: trans('huseyinfiliz-rewind.forum.community_slideshow.top_tag_label') });
+      items.push({
+        icon: 'fas fa-hashtag',
+        value: d.top_tag.name,
+        label: trans('huseyinfiliz-rewind.forum.community_slideshow.top_tag_label') as string,
+      });
     if (d.busiest_month?.peak_count > 0)
       items.push({
         icon: 'fas fa-calendar',
         value: MONTH_NAMES_FULL[d.busiest_month.peak_month] || '',
-        label: trans('huseyinfiliz-rewind.forum.community_slideshow.busiest_month_label'),
+        label: trans('huseyinfiliz-rewind.forum.community_slideshow.busiest_month_label') as string,
       });
     if (d.peak_hour?.peak_count > 0)
       items.push({
         icon: 'fas fa-clock',
         value: `${utcToLocalHour(d.peak_hour.peak_hour).toString().padStart(2, '0')}:00`,
-        label: trans('huseyinfiliz-rewind.forum.community_slideshow.peak_hour_label'),
+        label: trans('huseyinfiliz-rewind.forum.community_slideshow.peak_hour_label') as string,
       });
 
     return (
@@ -930,7 +938,7 @@ export default class CommunitySlideshow extends Page {
       } catch {}
     } else if (navigator.clipboard) {
       await navigator.clipboard.writeText(url);
-      app.alerts.show({ type: 'success' }, trans('huseyinfiliz-rewind.forum.slideshow.link_copied'));
+      app.alerts.show({ type: 'success' }, extractText(trans('huseyinfiliz-rewind.forum.slideshow.link_copied')));
     }
   }
 }
