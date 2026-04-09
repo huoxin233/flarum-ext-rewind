@@ -9,13 +9,7 @@ export default [
   new Extend.Routes()
     .add('huseyinfiliz-rewind.forum', '/rewind', ForumRewindPage)
     .add('huseyinfiliz-rewind.profile', '/u/:username/rewind', ProfileRewindPage)
-    .add('huseyinfiliz-rewind.slideshow', '/rewind/view/:id/:year', {
-      onmatch: () => import('./components/SlideshowPage').then((m) => m.default),
-    })
-    .add('huseyinfiliz-rewind.community-slideshow', '/rewind/view/:year', {
-      onmatch: () => import('./components/CommunitySlideshow').then((m) => m.default),
-    })
-    .add('huseyinfiliz-rewind.community-slideshow-default', '/rewind/view', {
-      onmatch: () => import('./components/CommunitySlideshow').then((m) => m.default),
-    }),
+    .add('huseyinfiliz-rewind.slideshow', '/rewind/view/:id/:year', () => import('./components/SlideshowPage'))
+    .add('huseyinfiliz-rewind.community-slideshow', '/rewind/view/:year', () => import('./components/CommunitySlideshow'))
+    .add('huseyinfiliz-rewind.community-slideshow-default', '/rewind/view', () => import('./components/CommunitySlideshow')),
 ];
