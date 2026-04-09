@@ -24,15 +24,11 @@ class BadgesEarned implements RewindMetric
 
     public function calculate(User $user, int $year): array
     {
-        $prefix = $this->db->getTablePrefix();
-        $badgeUserTable = $prefix.'fof_badge_user';
-        $badgesTable = $prefix.'fof_badges';
-
         $badges = $this->db->table('fof_badge_user')
-            ->join('fof_badges', $badgesTable.'.id', '=', $badgeUserTable.'.badge_id')
-            ->where($badgeUserTable.'.user_id', $user->id)
-            ->whereYear($badgeUserTable.'.earned_at', $year)
-            ->select($badgesTable.'.name', $badgesTable.'.icon')
+            ->join('fof_badges', 'fof_badges.id', '=', 'fof_badge_user.badge_id')
+            ->where('fof_badge_user.user_id', $user->id)
+            ->whereYear('fof_badge_user.earned_at', $year)
+            ->select('fof_badges.name', 'fof_badges.icon')
             ->limit(10)
             ->get();
 

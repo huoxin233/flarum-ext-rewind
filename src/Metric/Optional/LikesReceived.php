@@ -24,14 +24,10 @@ class LikesReceived implements RewindMetric
 
     public function calculate(User $user, int $year): array
     {
-        $prefix = $this->db->getTablePrefix();
-        $postsTable = $prefix.'posts';
-        $postLikesTable = $prefix.'post_likes';
-
         $count = $this->db->table('post_likes')
-            ->join('posts', $postsTable.'.id', '=', $postLikesTable.'.post_id')
-            ->where($postsTable.'.user_id', $user->id)
-            ->whereYear($postLikesTable.'.created_at', $year)
+            ->join('posts', 'posts.id', '=', 'post_likes.post_id')
+            ->where('posts.user_id', $user->id)
+            ->whereYear('post_likes.created_at', $year)
             ->count();
 
         return ['count' => $count];

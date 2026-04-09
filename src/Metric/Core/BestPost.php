@@ -36,18 +36,16 @@ class BestPost implements RewindMetric
     protected function bestByLikes(User $user, int $year): array
     {
         $prefix = $this->db->getTablePrefix();
-        $postsTable = $prefix.'posts';
-        $discussionsTable = $prefix.'discussions';
-        $postLikesTable = $prefix.'post_likes';
 
         $result = $this->db->table('posts')
-            ->leftJoin('post_likes', $postsTable.'.id', '=', $postLikesTable.'.post_id')
-            ->join('discussions', $postsTable.'.discussion_id', '=', $discussionsTable.'.id')
-            ->where($postsTable.'.user_id', $user->id)
-            ->where($postsTable.'.type', 'comment')
-            ->whereYear($postsTable.'.created_at', $year)
-            ->selectRaw($postsTable.'.id, '.$postsTable.'.discussion_id, '.$postsTable.'.content, '.$discussionsTable.'.title as discussion_title, COUNT('.$postLikesTable.'.user_id) as like_count')
-            ->groupBy($postsTable.'.id', $postsTable.'.discussion_id', $postsTable.'.content', $discussionsTable.'.title')
+            ->leftJoin('post_likes', 'posts.id', '=', 'post_likes.post_id')
+            ->join('discussions', 'posts.discussion_id', '=', 'discussions.id')
+            ->where('posts.user_id', $user->id)
+            ->where('posts.type', 'comment')
+            ->whereYear('posts.created_at', $year)
+            ->select('posts.id', 'posts.discussion_id', 'posts.content', 'discussions.title as discussion_title')
+            ->selectRaw('COUNT('.$prefix.'post_likes.user_id) as like_count')
+            ->groupBy('posts.id', 'posts.discussion_id', 'posts.content', 'discussions.title')
             ->orderByDesc('like_count')
             ->first();
 
@@ -67,18 +65,13 @@ class BestPost implements RewindMetric
 
     protected function bestByReplies(User $user, int $year): array
     {
-        // Fallback: find the user's post in the discussion with the most comments
-        $prefix = $this->db->getTablePrefix();
-        $postsTable = $prefix.'posts';
-        $discussionsTable = $prefix.'discussions';
-
         $result = $this->db->table('posts')
-            ->join('discussions', $postsTable.'.discussion_id', '=', $discussionsTable.'.id')
-            ->where($postsTable.'.user_id', $user->id)
-            ->where($postsTable.'.type', 'comment')
-            ->whereYear($postsTable.'.created_at', $year)
-            ->selectRaw($postsTable.'.id, '.$postsTable.'.discussion_id, '.$postsTable.'.content, '.$discussionsTable.'.title as discussion_title, '.$discussionsTable.'.comment_count')
-            ->orderByDesc($discussionsTable.'.comment_count')
+            ->join('discussions', 'posts.discussion_id', '=', 'discussions.id')
+            ->where('posts.user_id', $user->id)
+            ->where('posts.type', 'comment')
+            ->whereYear('posts.created_at', $year)
+            ->select('posts.id', 'posts.discussion_id', 'posts.content', 'discussions.title as discussion_title', 'discussions.comment_count')
+            ->orderByDesc('discussions.comment_count')
             ->first();
 
         if (! $result || $result->comment_count <= 1) {

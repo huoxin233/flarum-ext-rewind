@@ -27,18 +27,14 @@ class MostLoved implements CommunityMetric
             return ['users' => []];
         }
 
-        $prefix = $this->db->getTablePrefix();
-        $postsTable = $prefix.'posts';
-        $postLikesTable = $prefix.'post_likes';
-        $usersTable = $prefix.'users';
-
         $users = $this->db->table('post_likes')
-            ->join('posts', $postsTable.'.id', '=', $postLikesTable.'.post_id')
-            ->join('users', $usersTable.'.id', '=', $postsTable.'.user_id')
-            ->where($postsTable.'.type', 'comment')
-            ->whereYear($postLikesTable.'.created_at', $year)
-            ->selectRaw($postsTable.'.user_id, '.$usersTable.'.username, COUNT(*) as like_count')
-            ->groupBy($postsTable.'.user_id', $usersTable.'.username')
+            ->join('posts', 'posts.id', '=', 'post_likes.post_id')
+            ->join('users', 'users.id', '=', 'posts.user_id')
+            ->where('posts.type', 'comment')
+            ->whereYear('post_likes.created_at', $year)
+            ->select('posts.user_id', 'users.username')
+            ->selectRaw('COUNT(*) as like_count')
+            ->groupBy('posts.user_id', 'users.username')
             ->orderByDesc('like_count')
             ->limit(5)
             ->get();

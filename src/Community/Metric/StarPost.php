@@ -28,19 +28,16 @@ class StarPost implements CommunityMetric
         }
 
         $prefix = $this->db->getTablePrefix();
-        $postsTable = $prefix.'posts';
-        $postLikesTable = $prefix.'post_likes';
-        $discussionsTable = $prefix.'discussions';
-        $usersTable = $prefix.'users';
 
         $result = $this->db->table('posts')
-            ->leftJoin('post_likes', $postsTable.'.id', '=', $postLikesTable.'.post_id')
-            ->join('discussions', $postsTable.'.discussion_id', '=', $discussionsTable.'.id')
-            ->join('users', $postsTable.'.user_id', '=', $usersTable.'.id')
-            ->where($postsTable.'.type', 'comment')
-            ->whereYear($postsTable.'.created_at', $year)
-            ->selectRaw($postsTable.'.id, '.$postsTable.'.user_id, '.$postsTable.'.content, '.$postsTable.'.discussion_id, '.$discussionsTable.'.title as discussion_title, '.$usersTable.'.username, COUNT('.$postLikesTable.'.user_id) as like_count')
-            ->groupBy($postsTable.'.id', $postsTable.'.user_id', $postsTable.'.content', $postsTable.'.discussion_id', $discussionsTable.'.title', $usersTable.'.username')
+            ->leftJoin('post_likes', 'posts.id', '=', 'post_likes.post_id')
+            ->join('discussions', 'posts.discussion_id', '=', 'discussions.id')
+            ->join('users', 'posts.user_id', '=', 'users.id')
+            ->where('posts.type', 'comment')
+            ->whereYear('posts.created_at', $year)
+            ->select('posts.id', 'posts.user_id', 'posts.content', 'posts.discussion_id', 'discussions.title as discussion_title', 'users.username')
+            ->selectRaw('COUNT('.$prefix.'post_likes.user_id) as like_count')
+            ->groupBy('posts.id', 'posts.user_id', 'posts.content', 'posts.discussion_id', 'discussions.title', 'users.username')
             ->orderByDesc('like_count')
             ->first();
 

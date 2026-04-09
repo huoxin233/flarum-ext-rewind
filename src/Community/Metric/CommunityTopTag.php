@@ -28,16 +28,14 @@ class CommunityTopTag implements CommunityMetric
         }
 
         $prefix = $this->db->getTablePrefix();
-        $discussionTagTable = $prefix.'discussion_tag';
-        $discussionsTable = $prefix.'discussions';
-        $tagsTable = $prefix.'tags';
 
         $result = $this->db->table('discussion_tag')
-            ->join('discussions', $discussionsTable.'.id', '=', $discussionTagTable.'.discussion_id')
-            ->join('tags', $tagsTable.'.id', '=', $discussionTagTable.'.tag_id')
-            ->whereYear($discussionsTable.'.created_at', $year)
-            ->selectRaw($tagsTable.'.id, '.$tagsTable.'.name, '.$tagsTable.'.slug, '.$tagsTable.'.color, COUNT(DISTINCT '.$discussionsTable.'.id) as discussion_count')
-            ->groupBy($tagsTable.'.id', $tagsTable.'.name', $tagsTable.'.slug', $tagsTable.'.color')
+            ->join('discussions', 'discussions.id', '=', 'discussion_tag.discussion_id')
+            ->join('tags', 'tags.id', '=', 'discussion_tag.tag_id')
+            ->whereYear('discussions.created_at', $year)
+            ->select('tags.id', 'tags.name', 'tags.slug', 'tags.color')
+            ->selectRaw('COUNT(DISTINCT '.$prefix.'discussions.id) as discussion_count')
+            ->groupBy('tags.id', 'tags.name', 'tags.slug', 'tags.color')
             ->orderByDesc('discussion_count')
             ->first();
 

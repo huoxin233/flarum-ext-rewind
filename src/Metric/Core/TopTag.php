@@ -29,20 +29,18 @@ class TopTag implements RewindMetric
         }
 
         $prefix = $this->db->getTablePrefix();
-        $postsTable = $prefix.'posts';
-        $discussionTagTable = $prefix.'discussion_tag';
-        $tagsTable = $prefix.'tags';
 
         $result = $this->db->table('posts')
-            ->join('discussion_tag', $postsTable.'.discussion_id', '=', $discussionTagTable.'.discussion_id')
-            ->join('tags', $discussionTagTable.'.tag_id', '=', $tagsTable.'.id')
-            ->where($postsTable.'.user_id', $user->id)
-            ->where($postsTable.'.type', 'comment')
-            ->whereYear($postsTable.'.created_at', $year)
-            ->selectRaw($tagsTable.'.id, '.$tagsTable.'.name, '.$tagsTable.'.slug, '.$tagsTable.'.color, '.$tagsTable.'.icon, COUNT(*) as post_count')
-            ->groupBy($tagsTable.'.id', $tagsTable.'.name', $tagsTable.'.slug', $tagsTable.'.color', $tagsTable.'.icon')
+            ->join('discussion_tag', 'posts.discussion_id', '=', 'discussion_tag.discussion_id')
+            ->join('tags', 'discussion_tag.tag_id', '=', 'tags.id')
+            ->where('posts.user_id', $user->id)
+            ->where('posts.type', 'comment')
+            ->whereYear('posts.created_at', $year)
+            ->select('tags.id', 'tags.name', 'tags.slug', 'tags.color', 'tags.icon')
+            ->selectRaw('COUNT(*) as post_count')
+            ->groupBy('tags.id', 'tags.name', 'tags.slug', 'tags.color', 'tags.icon')
             ->orderByDesc('post_count')
-            ->orderByDesc($this->db->raw('MAX('.$postsTable.'.created_at)'))
+            ->orderByDesc($this->db->raw('MAX('.$prefix.'posts.created_at)'))
             ->first();
 
         if (! $result) {

@@ -23,18 +23,14 @@ class BestAnswersLeaderboard implements CommunityMetric
 
     public function calculate(int $year): array
     {
-        $prefix = $this->db->getTablePrefix();
-        $postsTable = $prefix.'posts';
-        $usersTable = $prefix.'users';
-        $discussionsTable = $prefix.'discussions';
-
         $users = $this->db->table('discussions')
-            ->join('posts', $postsTable.'.id', '=', $discussionsTable.'.best_answer_post_id')
-            ->join('users', $usersTable.'.id', '=', $postsTable.'.user_id')
-            ->whereNotNull($discussionsTable.'.best_answer_post_id')
-            ->whereYear($discussionsTable.'.best_answer_set_at', $year)
-            ->selectRaw($postsTable.'.user_id, '.$usersTable.'.username, COUNT(*) as answer_count')
-            ->groupBy($postsTable.'.user_id', $usersTable.'.username')
+            ->join('posts', 'posts.id', '=', 'discussions.best_answer_post_id')
+            ->join('users', 'users.id', '=', 'posts.user_id')
+            ->whereNotNull('discussions.best_answer_post_id')
+            ->whereYear('discussions.best_answer_set_at', $year)
+            ->select('posts.user_id', 'users.username')
+            ->selectRaw('COUNT(*) as answer_count')
+            ->groupBy('posts.user_id', 'users.username')
             ->orderByDesc('answer_count')
             ->limit(5)
             ->get();

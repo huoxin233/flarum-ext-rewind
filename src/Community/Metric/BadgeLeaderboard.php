@@ -27,15 +27,12 @@ class BadgeLeaderboard implements CommunityMetric
             return ['users' => []];
         }
 
-        $prefix = $this->db->getTablePrefix();
-        $badgesTable = $prefix.'fof_badge_user';
-        $usersTable = $prefix.'users';
-
         $users = $this->db->table('fof_badge_user')
-            ->join('users', $usersTable.'.id', '=', $badgesTable.'.user_id')
-            ->whereYear($badgesTable.'.earned_at', $year)
-            ->selectRaw($badgesTable.'.user_id, '.$usersTable.'.username, COUNT(*) as badge_count')
-            ->groupBy($badgesTable.'.user_id', $usersTable.'.username')
+            ->join('users', 'users.id', '=', 'fof_badge_user.user_id')
+            ->whereYear('fof_badge_user.earned_at', $year)
+            ->select('fof_badge_user.user_id', 'users.username')
+            ->selectRaw('COUNT(*) as badge_count')
+            ->groupBy('fof_badge_user.user_id', 'users.username')
             ->orderByDesc('badge_count')
             ->limit(5)
             ->get();
