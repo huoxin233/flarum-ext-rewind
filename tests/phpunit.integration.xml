@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../vendor/phpunit/phpunit/phpunit.xsd"
+    backupGlobals="false"
+    cacheDirectory=".phpunit.cache"
+    backupStaticProperties="false"
+    colors="true"
+    processIsolation="true"
+    stopOnFailure="false"
+>
+    <source>
+        <include>
+            <directory suffix=".php">../src/</directory>
+        </include>
+    </source>
+    <testsuites>
+        <testsuite name="Flarum Integration Tests">
+            <directory suffix="Test.php">./integration</directory>
+             <exclude>./integration/tmp</exclude>
+        </testsuite>
+    </testsuites>
+    <php>
+        <env name="DB_DRIVER" value="mysql"/>
+        <env name="DB_HOST" value="localhost"/>
+        <env name="DB_DATABASE" value="flarum_test"/>
+        <env name="DB_USERNAME" value="root"/>
+        <env name="DB_PASSWORD" value=""/>
+    </php>
+</phpunit>

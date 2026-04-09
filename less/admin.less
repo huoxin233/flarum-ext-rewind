@@ -1,0 +1,303 @@
+@rw-admin-radius: 8px;
+@rw-admin-transition: 180ms;
+
+.RewindSettings {
+  padding: 20px 25px;
+}
+
+.RewindSettings-header {
+  margin-bottom: 25px;
+}
+
+.RewindSettings-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--control-bg);
+  padding: 4px;
+  border-radius: @rw-admin-radius;
+
+  .Button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    flex: 1;
+    white-space: nowrap;
+    background: transparent;
+    color: var(--muted-color);
+    transition: all @rw-admin-transition ease;
+
+    .Button-icon {
+      display: inline-block;
+      margin-right: 6px;
+      font-size: 14px;
+    }
+
+    &:hover {
+      color: var(--link-color);
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    &.Button--primary {
+      color: var(--primary-color);
+      background: var(--body-bg);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      font-weight: 700;
+    }
+  }
+}
+
+.RewindSettings-content {
+  background: var(--body-bg);
+  border: 1px solid var(--control-bg);
+  border-radius: @rw-admin-radius;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 24px;
+  margin-top: 16px;
+
+  .helpText {
+    margin-bottom: 16px;
+  }
+}
+
+// Accordion sections
+.RewindSettings-accordion {
+  border: 1px solid var(--control-bg);
+  border-radius: @rw-admin-radius;
+  margin-bottom: 10px;
+  overflow: hidden;
+
+  &--open {
+    .RewindSettings-accordionHeader {
+      border-bottom: 1px solid var(--control-bg);
+    }
+  }
+
+  &--disabled {
+    .RewindSettings-accordionBody {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+  }
+}
+
+.RewindSettings-accordionHeader {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: var(--control-bg);
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+  text-align: left;
+  transition: background @rw-admin-transition ease;
+
+  &:hover {
+    background: var(--control-bg-shaded);
+  }
+}
+
+.RewindSettings-accordionIcon {
+  margin-right: 10px;
+  font-size: 14px;
+  color: var(--primary-color);
+  width: 18px;
+  text-align: center;
+}
+
+.RewindSettings-accordionTitle {
+  flex: 1;
+}
+
+.RewindSettings-accordionBadge {
+  font-size: 11px;
+  font-weight: normal;
+  font-style: italic;
+  color: var(--muted-color);
+  margin-right: 12px;
+}
+
+.RewindSettings-accordionChevron {
+  font-size: 12px;
+  color: var(--muted-color);
+}
+
+.RewindSettings-accordionBody {
+  padding: 15px 16px;
+}
+
+.RewindSettings-metricsPills {
+  display: flex;
+  gap: 4px;
+  background: var(--control-bg);
+  padding: 3px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.RewindSettings-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted-color);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 150ms ease;
+
+  &:hover {
+    color: var(--text-color);
+  }
+
+  &.active {
+    background: var(--body-bg);
+    color: var(--primary-color);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  i { font-size: 13px; }
+}
+
+.RewindSettings-metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.RewindSettings-progress {
+  margin-bottom: 12px;
+}
+
+.RewindSettings-progressBar {
+  height: 8px;
+  background: var(--control-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.RewindSettings-progressFill {
+  height: 100%;
+  background: var(--primary-color);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.RewindSettings-progressText {
+  font-size: 12px;
+  color: var(--muted-color);
+}
+
+/* Generate Modal */
+.GenerateModal .Modal-body {
+  padding: 20px 30px 30px;
+}
+
+.GenerateModal-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 8px;
+  color: #b45309;
+  font-size: 13px;
+  margin-bottom: 20px;
+
+  i { flex-shrink: 0; }
+}
+
+.GenerateModal-progress {
+  margin-bottom: 20px;
+}
+
+.GenerateModal-progressBar {
+  height: 10px;
+  background: var(--control-bg);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.GenerateModal-progressFill {
+  height: 100%;
+  background: var(--primary-color);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+
+  &--done {
+    background: #059669;
+  }
+
+  &--error {
+    background: #dc2626;
+  }
+}
+
+.GenerateModal-progressInfo {
+  font-size: 13px;
+  min-height: 20px;
+}
+
+.GenerateModal-stepLabel {
+  color: var(--muted-color);
+}
+
+.GenerateModal-doneLabel {
+  color: #059669;
+  font-weight: 600;
+
+  i { margin-right: 4px; }
+}
+
+.GenerateModal-errorLabel {
+  color: #dc2626;
+  font-weight: 600;
+
+  i { margin-right: 4px; }
+}
+
+.GenerateModal-loading {
+  text-align: center;
+  padding: 30px 0;
+}
+
+.GenerateModal-config {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.GenerateModal-field {
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+
+  .FormControl {
+    width: 100%;
+  }
+}
+
+.GenerateModal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}

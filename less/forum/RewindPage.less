@@ -1,0 +1,271 @@
+/* Rewind Page (Forum) — /rewind */
+.RewindPage {
+  .RewindPage-adminNotice {
+    background: var(--alert-bg);
+    color: var(--alert-color);
+    padding: 10px 0;
+    font-size: 0.9em;
+    text-align: center;
+
+    i { margin-right: 6px; }
+  }
+
+  .RewindHero .Hero-title i {
+    margin-right: 6px;
+  }
+
+  .RewindPage-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 12px;
+  }
+
+  .RewindPage-yearSelector {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .RewindPage-yearBtn {
+    background: var(--body-bg);
+    border: 1px solid var(--control-bg);
+    color: var(--muted-color);
+    padding: 6px 16px;
+    border-radius: 18px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    &.active {
+      background: var(--primary-color);
+      color: #fff;
+      border-color: var(--primary-color);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .RewindPage-toolbarRight {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .RewindPage-myRewindBtn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--control-bg) !important;
+    border-radius: 18px;
+    padding: 6px 16px;
+    font-size: 0.9em;
+    font-weight: 600;
+    white-space: nowrap;
+
+    i { font-size: 0.9em; }
+  }
+
+  .RewindPage-contentLoading {
+    text-align: center;
+    padding: 60px 0;
+  }
+
+  .RewindPage-loading {
+    text-align: center;
+    padding: 80px 0;
+  }
+
+  .RewindPage-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding-bottom: 40px;
+  }
+
+  .RewindPage-slideshowBanner {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    margin-bottom: 24px;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+  }
+  .RewindPage-slideshowBannerBg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, #302b63 0%, #6B21A8 50%, #a855f7 100%);
+    z-index: 0;
+  }
+  .RewindPage-slideshowBannerContent {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 24px;
+    color: #fff;
+
+    > i {
+      font-size: 2em;
+      opacity: 0.9;
+      flex-shrink: 0;
+    }
+  }
+  .RewindPage-slideshowBannerTitle {
+    font-size: 1.15em;
+    font-weight: 700;
+  }
+  .RewindPage-slideshowBannerSub {
+    font-size: 0.85em;
+    opacity: 0.7;
+    margin-top: 2px;
+  }
+
+  .RewindPage-emptyBanner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    border-radius: 16px;
+    background: var(--control-bg);
+    color: var(--muted-color);
+    font-size: 0.95em;
+
+    i { font-size: 1.3em; opacity: 0.5; }
+  }
+
+  .RewindPage-sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+
+    h3 { margin: 0; font-size: 1.3em; }
+  }
+
+  .RewindPage-statsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 30px;
+
+    @media (max-width: 480px) { grid-template-columns: 1fr; }
+  }
+
+  .RewindPage-statCard {
+    background: var(--body-bg);
+    border: 1px solid var(--control-bg);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+      border-color: var(--primary-color);
+    }
+
+    &--wide {
+      grid-column: span 2;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      text-align: left;
+
+      .RewindPage-statCardIcon {
+        margin-bottom: 0;
+        width: 48px;
+        height: 48px;
+        font-size: 1.2em;
+        flex-shrink: 0;
+      }
+
+      .RewindPage-statCardLabel { margin-top: 0; }
+
+      @media (max-width: 480px) { grid-column: span 1; }
+    }
+  }
+
+  .RewindPage-statCardIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--control-bg);
+    color: var(--primary-color);
+    font-size: 1.1em;
+    margin-bottom: 12px;
+  }
+
+  .RewindPage-statCardValue {
+    font-size: 2em;
+    font-weight: 800;
+    color: var(--text-color);
+    line-height: 1.1;
+
+    &--text {
+      font-size: 1.1em;
+      font-weight: 600;
+    }
+  }
+
+  .RewindPage-statCardLabel {
+    font-size: 0.8em;
+    color: var(--muted-color);
+    margin-top: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  .RewindPage-statCardSubtitle {
+    font-size: 0.85em;
+    color: var(--muted-color);
+  }
+
+  .RewindPage-emptyState {
+    text-align: center;
+    padding: 60px 20px;
+
+    h3 { margin: 16px 0 8px; font-size: 1.3em; }
+    p { color: var(--muted-color); margin-bottom: 20px; }
+  }
+
+  .RewindPage-emptyStateIcon {
+    font-size: 2.5em;
+    color: var(--muted-color);
+    opacity: 0.4;
+  }
+
+  .RewindPage-generateBtn {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .RewindPage-comingSoon {
+    font-style: italic;
+  }
+
+}

@@ -1,0 +1,119 @@
+/* Profile Rewind Grid */
+.RewindGrid {
+  padding: 20px 0;
+
+  .RewindGrid-generate {
+    margin-bottom: 20px;
+  }
+
+  .RewindGrid-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .RewindGrid-card {
+    position: relative;
+    background: var(--body-bg);
+    border: 1px solid var(--control-bg);
+    border-radius: 12px;
+
+    &--generate {
+      border-style: dashed;
+      border-color: var(--primary-color);
+      cursor: pointer;
+
+      &:hover {
+        background: var(--control-bg);
+      }
+    }
+
+    &--locked {
+      opacity: 0.6;
+      cursor: default;
+    }
+  }
+
+  .RewindGrid-cardLink {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .RewindGrid-cardIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--control-bg);
+    color: var(--primary-color);
+    font-size: 1.1em;
+    flex-shrink: 0;
+
+    &--generate {
+      background: var(--primary-color);
+      color: #fff;
+    }
+
+    &--locked {
+      background: var(--control-bg);
+      color: var(--muted-color);
+    }
+  }
+
+  .RewindGrid-cardBody {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .RewindGrid-cardYear {
+    font-size: 1.25em;
+    font-weight: 700;
+    color: var(--text-color);
+    line-height: 1.2;
+  }
+
+  .RewindGrid-cardMeta {
+    margin-top: 4px;
+  }
+
+  .RewindGrid-cardBadge {
+    font-size: 0.8em;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+
+    &.public {
+      color: var(--control-success-color);
+    }
+    &.private {
+      color: var(--muted-color);
+    }
+    &.generate {
+      color: var(--primary-color);
+    }
+    &.locked {
+      color: var(--muted-color);
+    }
+
+    i { font-size: 0.85em; }
+  }
+
+  .RewindGrid-cardControls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+  }
+
+  .RewindGrid-empty {
+    color: var(--muted-color);
+    font-style: italic;
+    padding: 20px 0;
+  }
+}

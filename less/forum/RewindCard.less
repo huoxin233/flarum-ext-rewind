@@ -1,0 +1,149 @@
+/* Rewind View Page */
+.RewindView {
+  padding: 20px 0;
+
+  .RewindView-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+
+    h2 {
+      margin: 0;
+    }
+  }
+
+  .RewindView-loading {
+    text-align: center;
+    padding: 60px 0;
+  }
+
+  .RewindView-empty {
+    text-align: center;
+    padding: 60px 0;
+    color: var(--muted-color);
+  }
+
+  .RewindView-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .RewindView-footer {
+    padding: 20px 0;
+    border-top: 1px solid var(--control-bg);
+  }
+
+  .RewindView-back {
+    padding: 20px 0;
+  }
+}
+
+/* Card entrance animation */
+.RewindView-cards .RewindCard {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: rewindCardIn 0.4s ease forwards;
+}
+
+@keyframes rewindCardIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Rewind Card */
+.RewindCard {
+  border-radius: 12px;
+  background: var(--body-bg);
+  border: 1px solid var(--control-bg);
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .RewindCard-header {
+    padding: 16px 20px 8px;
+
+    h3 {
+      margin: 0;
+      font-size: 1.1em;
+      color: var(--primary-color);
+    }
+  }
+
+  .RewindCard-body {
+    padding: 8px 20px 20px;
+
+    p {
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    strong {
+      color: var(--primary-color);
+      font-size: 1.1em;
+    }
+  }
+
+  /* Mini bar chart for monthly activity */
+  .RewindCard-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 80px;
+    margin-top: 12px;
+    padding-top: 8px;
+  }
+
+  .RewindCard-chartBar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+  }
+
+  .RewindCard-chartBarFill {
+    width: 100%;
+    min-height: 2px;
+    background: var(--primary-color);
+    border-radius: 3px 3px 0 0;
+    transition: height 0.3s;
+  }
+
+  .RewindCard-chartLabel {
+    font-size: 0.65em;
+    color: var(--muted-color);
+    margin-top: 4px;
+  }
+
+  .RewindCard-message {
+    margin-top: 8px !important;
+    font-style: italic;
+    font-size: 0.9em;
+    color: var(--muted-color);
+  }
+
+  .RewindCard-badgeList {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0;
+
+    li {
+      padding: 4px 0;
+      font-size: 0.95em;
+
+      i {
+        margin-right: 6px;
+        color: var(--primary-color);
+      }
+    }
+  }
+}

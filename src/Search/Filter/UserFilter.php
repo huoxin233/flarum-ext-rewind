@@ -1,0 +1,24 @@
+<?php
+
+namespace HuseyinFiliz\Rewind\Search\Filter;
+
+use Flarum\Search\Filter\FilterInterface;
+use Flarum\Search\SearchState;
+
+/**
+ * @implements FilterInterface<SearchState>
+ */
+class UserFilter implements FilterInterface
+{
+    public function getFilterKey(): string
+    {
+        return 'user';
+    }
+
+    public function filter(SearchState $state, string|array $value, bool $negate): void
+    {
+        $userId = is_array($value) ? $value[0] : $value;
+
+        $state->getQuery()->where('user_id', $negate ? '!=' : '=', (int) $userId);
+    }
+}
