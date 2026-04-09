@@ -15,7 +15,8 @@ class CommunityMetricRegistry
     public function __construct(
         protected ExtensionManager $extensions,
         protected ConnectionInterface $db,
-    ) {}
+    ) {
+    }
 
     public function addMetric(CommunityMetric $metric): void
     {
@@ -102,11 +103,13 @@ class CommunityMetricRegistry
             if ($this->db->transactionLevel() > 0) {
                 $this->db->rollBack();
             }
+
             return $this->fallbackForKey($metric->key());
         } catch (Throwable $e) {
             if ($this->db->transactionLevel() > 0) {
                 $this->db->rollBack();
             }
+
             return $this->fallbackForKey($metric->key());
         }
     }

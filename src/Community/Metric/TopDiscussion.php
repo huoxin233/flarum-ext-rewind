@@ -9,7 +9,8 @@ class TopDiscussion implements CommunityMetric
 {
     public function __construct(
         protected ConnectionInterface $db,
-    ) {}
+    ) {
+    }
 
     public function requiredExtension(): ?string
     {
@@ -37,12 +38,12 @@ class TopDiscussion implements CommunityMetric
 
         if (! $result) {
             return [
-                'id' => null, 
-                'title' => null, 
-                'slug' => null, 
-                'post_count' => 0, 
-                'content_html' => null, 
-                'author_username' => null, 
+                'id' => null,
+                'title' => null,
+                'slug' => null,
+                'post_count' => 0,
+                'content_html' => null,
+                'author_username' => null,
                 'author_id' => null
             ];
         }

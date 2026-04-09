@@ -9,7 +9,8 @@ class TotalBestAnswers implements CommunityMetric
 {
     public function __construct(
         protected ConnectionInterface $db,
-    ) {}
+    ) {
+    }
 
     public function requiredExtension(): ?string
     {

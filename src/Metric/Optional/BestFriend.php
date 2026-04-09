@@ -10,7 +10,8 @@ class BestFriend implements RewindMetric
 {
     public function __construct(
         protected ConnectionInterface $db,
-    ) {}
+    ) {
+    }
 
     public function key(): string
     {
