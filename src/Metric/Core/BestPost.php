@@ -10,7 +10,8 @@ class BestPost implements RewindMetric
 {
     public function __construct(
         protected ConnectionInterface $db,
-    ) {}
+    ) {
+    }
 
     public function key(): string
     {
@@ -99,6 +100,7 @@ class BestPost implements RewindMetric
     {
         try {
             $formatter = resolve(\Flarum\Formatter\Formatter::class);
+
             return $formatter->render($content);
         } catch (\Throwable $e) {
             return \HuseyinFiliz\Rewind\ContentCleaner::excerpt($content);

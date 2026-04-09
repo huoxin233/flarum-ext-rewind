@@ -23,7 +23,8 @@ class CommunitySnapshotResource extends AbstractDatabaseResource
     public function __construct(
         protected CommunityMetricRegistry $metricRegistry,
         protected SettingsRepositoryInterface $settings,
-    ) {}
+    ) {
+    }
 
     public function type(): string
     {
@@ -166,7 +167,7 @@ class CommunitySnapshotResource extends AbstractDatabaseResource
 
         if ($year < 2000 || $year > $activeYear) {
             throw new \Flarum\Foundation\ValidationException([
-                'year' => 'Year must be between 2000 and ' . $activeYear,
+                'year' => 'Year must be between 2000 and '.$activeYear,
             ]);
         }
 

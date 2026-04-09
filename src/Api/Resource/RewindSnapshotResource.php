@@ -2,6 +2,7 @@
 
 namespace HuseyinFiliz\Rewind\Api\Resource;
 
+use Carbon\Carbon;
 use Flarum\Api\Context;
 use Flarum\Api\Endpoint;
 use Flarum\Api\Resource\AbstractDatabaseResource;
@@ -12,7 +13,6 @@ use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use HuseyinFiliz\Rewind\Metric\MetricRegistry;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Laminas\Diactoros\Response\JsonResponse;
 use Tobyz\JsonApiServer\Context as BaseContext;
@@ -25,7 +25,8 @@ class RewindSnapshotResource extends AbstractDatabaseResource
     public function __construct(
         protected MetricRegistry $metricRegistry,
         protected SettingsRepositoryInterface $settings,
-    ) {}
+    ) {
+    }
 
     public function type(): string
     {
@@ -193,8 +194,11 @@ class RewindSnapshotResource extends AbstractDatabaseResource
             Schema\Integer::make('year'),
             Schema\Arr::make('data')
                 ->visible(function (RewindSnapshot $snapshot, Context $context) {
-                    if ($snapshot->is_public) return true;
+                    if ($snapshot->is_public) {
+                        return true;
+                    }
                     $actor = $context->getActor();
+
                     return $actor->id === $snapshot->user_id || $actor->hasPermission('huseyinfiliz-rewind.moderate');
                 }),
             Schema\DateTime::make('generatedAt'),
@@ -215,21 +219,43 @@ class RewindSnapshotResource extends AbstractDatabaseResource
             Schema\Boolean::make('isEmpty')
                 ->get(function (RewindSnapshot $snapshot) {
                     $data = $snapshot->data;
-                    if (! is_array($data)) return true;
+                    if (! is_array($data)) {
+                        return true;
+                    }
 
                     foreach ($data as $key => $value) {
-                        if (str_starts_with($key, '_')) continue;
-                        if (! is_array($value)) continue;
+                        if (str_starts_with($key, '_')) {
+                            continue;
+                        }
+                        if (! is_array($value)) {
+                            continue;
+                        }
 
                         // Check for any meaningful content
-                        if (isset($value['count']) && $value['count'] > 0) return false;
-                        if (isset($value['total']) && $value['total'] > 0) return false;
-                        if (isset($value['user_id']) && $value['user_id']) return false;
-                        if (isset($value['post_id']) && $value['post_id']) return false;
-                        if (isset($value['words']) && ! empty($value['words'])) return false;
-                        if (isset($value['emojis']) && ! empty($value['emojis'])) return false;
-                        if (isset($value['peak_hour']) && $value['peak_hour'] !== null) return false;
-                        if (isset($value['peak_month']) && $value['peak_month'] > 0) return false;
+                        if (isset($value['count']) && $value['count'] > 0) {
+                            return false;
+                        }
+                        if (isset($value['total']) && $value['total'] > 0) {
+                            return false;
+                        }
+                        if (isset($value['user_id']) && $value['user_id']) {
+                            return false;
+                        }
+                        if (isset($value['post_id']) && $value['post_id']) {
+                            return false;
+                        }
+                        if (isset($value['words']) && ! empty($value['words'])) {
+                            return false;
+                        }
+                        if (isset($value['emojis']) && ! empty($value['emojis'])) {
+                            return false;
+                        }
+                        if (isset($value['peak_hour']) && $value['peak_hour'] !== null) {
+                            return false;
+                        }
+                        if (isset($value['peak_month']) && $value['peak_month'] > 0) {
+                            return false;
+                        }
                     }
 
                     return true;
@@ -330,7 +356,7 @@ class RewindSnapshotResource extends AbstractDatabaseResource
 
         if ($year < 2000 || $year > $activeYear) {
             throw new \Flarum\Foundation\ValidationException([
-                'year' => 'Year must be between 2000 and ' . $activeYear,
+                'year' => 'Year must be between 2000 and '.$activeYear,
             ]);
         }
 

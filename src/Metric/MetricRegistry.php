@@ -16,7 +16,8 @@ class MetricRegistry
     public function __construct(
         protected ExtensionManager $extensions,
         protected ConnectionInterface $db,
-    ) {}
+    ) {
+    }
 
     public function addMetric(RewindMetric $metric): void
     {

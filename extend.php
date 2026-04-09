@@ -41,9 +41,9 @@ return [
     (new Extend\ServiceProvider())
         ->register(RewindServiceProvider::class),
 
-    (new Extend\ApiResource(RewindSnapshotResource::class)),
+    new Extend\ApiResource(RewindSnapshotResource::class),
 
-    (new Extend\ApiResource(CommunitySnapshotResource::class)),
+    new Extend\ApiResource(CommunitySnapshotResource::class),
 
     (new Extend\ApiResource(Resource\ForumResource::class))
         ->fields(fn () => [
