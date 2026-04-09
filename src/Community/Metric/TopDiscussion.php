@@ -24,30 +24,35 @@ class TopDiscussion implements CommunityMetric
     public function calculate(int $year): array
     {
         $prefix = $this->db->getTablePrefix();
-        $postsTable = $prefix.'posts';
-        $discussionsTable = $prefix.'discussions';
-        $usersTable = $prefix.'users';
 
         $result = $this->db->table('posts')
-            ->join('discussions', $discussionsTable.'.id', '=', $postsTable.'.discussion_id')
-            ->where($postsTable.'.type', 'comment')
-            ->whereYear($postsTable.'.created_at', $year)
-            ->selectRaw($discussionsTable.'.id, '.$discussionsTable.'.title, '.$discussionsTable.'.slug, COUNT('.$postsTable.'.id) as post_count')
-            ->groupBy($discussionsTable.'.id', $discussionsTable.'.title', $discussionsTable.'.slug')
+            ->join('discussions', 'discussions.id', '=', 'posts.discussion_id')
+            ->where('posts.type', 'comment')
+            ->whereYear('posts.created_at', $year)
+            ->select('discussions.id', 'discussions.title', 'discussions.slug')
+            ->selectRaw('COUNT('.$prefix.'posts.id) as post_count')
+            ->groupBy('discussions.id', 'discussions.title', 'discussions.slug')
             ->orderByDesc('post_count')
             ->first();
 
         if (! $result) {
-            return ['id' => null, 'title' => null, 'slug' => null, 'post_count' => 0, 'content_html' => null, 'author_username' => null, 'author_id' => null];
+            return [
+                'id' => null, 
+                'title' => null, 
+                'slug' => null, 
+                'post_count' => 0, 
+                'content_html' => null, 
+                'author_username' => null, 
+                'author_id' => null
+            ];
         }
 
-        // Get the first post excerpt and author
         $firstPost = $this->db->table('posts')
-            ->join('users', $usersTable.'.id', '=', $postsTable.'.user_id')
-            ->where($postsTable.'.discussion_id', $result->id)
-            ->where($postsTable.'.type', 'comment')
-            ->orderBy($postsTable.'.number')
-            ->select($postsTable.'.content', $usersTable.'.username', $usersTable.'.id as user_id')
+            ->join('users', 'users.id', '=', 'posts.user_id')
+            ->where('posts.discussion_id', $result->id)
+            ->where('posts.type', 'comment')
+            ->orderBy('posts.number')
+            ->select('posts.content', 'users.username', 'users.id as user_id')
             ->first();
 
         $contentHtml = null;
