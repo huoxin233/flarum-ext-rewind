@@ -77,7 +77,7 @@ If you find this extension useful, consider:
 
 ## Links
 
-* [Discuss](https://discuss.flarum.org/d/38832)
+* [Discuss](https://discuss.flarum.org/d/39044-flarum-rewind-personalized-annual-recaps)
 * [Packagist](https://packagist.org/packages/huseyinfiliz/rewind)
 * [GitHub](https://github.com/huseyinfiliz/rewind)
 * [Issues](https://github.com/huseyinfiliz/rewind/issues)
