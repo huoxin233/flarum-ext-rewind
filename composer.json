@@ -19,7 +19,7 @@
         "flarum/likes": "Required for likes received/given and best friend metrics",
         "flarum/mentions": "Required for mentions received/given and best friend mentions metrics",
         "fof/badges": "Required for badges earned and badge leaderboard metrics",
-        "flarum/best-answer": "Required for best answers and leaderboard metrics",
+        "fof/best-answer": "Required for best answers and leaderboard metrics",
         "flarum/tags": "Required for top tag metric",
         "fof/reactions": "Required for community total reactions metric",
         "flarum/emoji": "Required for emoji CDN image rendering"
