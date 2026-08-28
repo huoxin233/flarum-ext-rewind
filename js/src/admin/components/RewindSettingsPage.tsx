@@ -472,12 +472,8 @@ export default class RewindSettingsPage extends ExtensionPage {
                       value={currentMode || 'slideshow'}
                       onchange={(e: InputEvent) => this.setYearMode(year, (e.target as HTMLSelectElement).value)}
                     >
-                      <option value="slideshow">
-                        {app.translator.trans('huseyinfiliz-rewind.admin.settings.render_mode_slideshow')}
-                      </option>
-                      <option value="blade">
-                        {app.translator.trans('huseyinfiliz-rewind.admin.settings.render_mode_blade')}
-                      </option>
+                      <option value="slideshow">{app.translator.trans('huseyinfiliz-rewind.admin.settings.render_mode_slideshow')}</option>
+                      <option value="blade">{app.translator.trans('huseyinfiliz-rewind.admin.settings.render_mode_blade')}</option>
                     </select>
                   </div>
                 </div>
@@ -665,7 +661,7 @@ export default class RewindSettingsPage extends ExtensionPage {
   getYearModes(): Record<string, string> {
     const raw = this.setting('huseyinfiliz-rewind.year_render_modes')();
     try {
-      return typeof raw === 'string' ? JSON.parse(raw || '{}') : (raw || {});
+      return typeof raw === 'string' ? JSON.parse(raw || '{}') : raw || {};
     } catch {
       return {};
     }
