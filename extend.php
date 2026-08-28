@@ -29,9 +29,6 @@ return [
         ->jsDirectory(__DIR__.'/js/dist/forum')
         ->css(__DIR__.'/less/forum.less')
         ->route('/rewind', 'huseyinfiliz-rewind.forum')
-        ->route('/rewind/view/{id}/{year}', 'huseyinfiliz-rewind.slideshow')
-        ->route('/rewind/view/{year}', 'huseyinfiliz-rewind.community-slideshow')
-        ->route('/rewind/view', 'huseyinfiliz-rewind.community-slideshow-default')
         ->route('/u/{username}/rewind', 'huseyinfiliz-rewind.profile'),
 
     (new Extend\Routes('forum'))
