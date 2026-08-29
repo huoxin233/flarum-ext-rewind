@@ -483,6 +483,8 @@ export default class RewindSettingsPage extends ExtensionPage {
             </div>
           </div>
 
+          <div className="Form-group">{this.submitButton()}</div>
+
           <div className="RewindSettings-section">
             <h3>
               <i className="fas fa-code" /> {app.translator.trans('huseyinfiliz-rewind.admin.settings.templates_variables_title')}
@@ -637,8 +639,6 @@ export default class RewindSettingsPage extends ExtensionPage {
               </pre>
             </div>
           </div>
-
-          <div className="Form-group">{this.submitButton()}</div>
         </div>
       </Form>
     );
