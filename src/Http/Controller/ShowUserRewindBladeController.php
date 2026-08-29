@@ -13,6 +13,7 @@ namespace HuseyinFiliz\Rewind\Http\Controller;
 
 use Flarum\Frontend\Frontend;
 use Flarum\Http\RequestUtil;
+use Flarum\Http\UrlGenerator;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
@@ -29,6 +30,7 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
         protected RewindViewResolver $resolver,
         protected SettingsRepositoryInterface $settings,
         protected Container $container,
+        protected UrlGenerator $url,
     ) {
     }
 
@@ -54,7 +56,7 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
         $enabled = (bool) $this->settings->get('huseyinfiliz-rewind.enabled', false);
         $canModerate = $actor->hasPermission('huseyinfiliz-rewind.moderate');
         $forumTitle = (string) $this->settings->get('forum_title', 'Flarum');
-        $baseUrl = (string) $request->getUri()->withPath('')->withQuery('')->withFragment('');
+        $baseUrl = rtrim($this->url->to('forum')->base(), '/');
 
         if (! $enabled && ! $canModerate) {
             return $this->renderError(
