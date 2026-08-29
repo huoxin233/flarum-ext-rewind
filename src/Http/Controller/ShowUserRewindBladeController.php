@@ -48,6 +48,7 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
         if ($renderMode === 'slideshow' && $this->container->has('flarum.frontend.forum')) {
             /** @var Frontend $frontend */
             $frontend = $this->container->make('flarum.frontend.forum');
+
             return new HtmlResponse($frontend->document($request)->render());
         }
 
