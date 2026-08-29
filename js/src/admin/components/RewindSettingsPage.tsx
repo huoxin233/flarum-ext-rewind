@@ -426,6 +426,9 @@ export default class RewindSettingsPage extends ExtensionPage {
   }
 
   templatesTab(): Mithril.Children {
+    const currentYearStr = String(new Date().getFullYear());
+    const activeYear = parseInt(this.setting('huseyinfiliz-rewind.active_year')() || currentYearStr, 10);
+
     return (
       <Form>
         <div className="RewindSettings-templates">
@@ -446,9 +449,9 @@ export default class RewindSettingsPage extends ExtensionPage {
             <p className="helpText">{app.translator.trans('huseyinfiliz-rewind.admin.settings.templates_storage_help')}</p>
 
             <div className="RewindSettings-pathsList">
-              <div className="RewindSettings-pathItem" onclick={() => this.copyToClipboard('storage/rewind/views/user_2025.blade.php')}>
+              <div className="RewindSettings-pathItem" onclick={() => this.copyToClipboard(`storage/rewind/views/user_${activeYear}.blade.php`)}>
                 <span className="RewindSettings-pathBadge">User (Year-Specific)</span>
-                <code>storage/rewind/views/user_{'{YEAR}'}.blade.php</code>
+                <code>{`storage/rewind/views/user_${activeYear}.blade.php`}</code>
                 <i className="fas fa-copy RewindSettings-copyIcon" title="Click to copy" />
               </div>
               <div className="RewindSettings-pathItem" onclick={() => this.copyToClipboard('storage/rewind/views/user.blade.php')}>
@@ -456,9 +459,9 @@ export default class RewindSettingsPage extends ExtensionPage {
                 <code>storage/rewind/views/user.blade.php</code>
                 <i className="fas fa-copy RewindSettings-copyIcon" title="Click to copy" />
               </div>
-              <div className="RewindSettings-pathItem" onclick={() => this.copyToClipboard('storage/rewind/views/community_2025.blade.php')}>
+              <div className="RewindSettings-pathItem" onclick={() => this.copyToClipboard(`storage/rewind/views/community_${activeYear}.blade.php`)}>
                 <span className="RewindSettings-pathBadge">Community (Year-Specific)</span>
-                <code>storage/rewind/views/community_{'{YEAR}'}.blade.php</code>
+                <code>{`storage/rewind/views/community_${activeYear}.blade.php`}</code>
                 <i className="fas fa-copy RewindSettings-copyIcon" title="Click to copy" />
               </div>
               <div className="RewindSettings-pathItem" onclick={() => this.copyToClipboard('storage/rewind/views/community.blade.php')}>
@@ -484,7 +487,7 @@ export default class RewindSettingsPage extends ExtensionPage {
                   <div className="RewindSettings-yearModeRow">
                     <div className="RewindSettings-yearModeYear">
                       <strong>{year}</strong>
-                      {parseInt(this.setting('huseyinfiliz-rewind.active_year')() || '2025', 10) === year && (
+                      {parseInt(this.setting('huseyinfiliz-rewind.active_year')() || currentYearStr, 10) === year && (
                         <span className="RewindSettings-pathBadge">Active</span>
                       )}
                     </div>
@@ -704,7 +707,7 @@ export default class RewindSettingsPage extends ExtensionPage {
   }
 
   getAllDisplayYears(): number[] {
-    const activeYear = parseInt(this.setting('huseyinfiliz-rewind.active_year')() || '2025', 10);
+    const activeYear = parseInt(this.setting('huseyinfiliz-rewind.active_year')() || String(new Date().getFullYear()), 10);
     const set = new Set<number>([activeYear]);
 
     this.historicalYears.forEach((y) => {
