@@ -23,7 +23,7 @@ class RewindViewResolver
         protected Paths $paths,
         protected ViewFactory $viewFactory,
     ) {
-        $this->customStorageViewsPath = $this->paths->storage . '/rewind/views';
+        $this->customStorageViewsPath = $this->paths->storage.'/rewind/views';
         $this->registerCustomNamespace();
     }
 
