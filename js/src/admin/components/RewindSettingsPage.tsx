@@ -68,6 +68,27 @@ export default class RewindSettingsPage extends ExtensionPage {
   private activeTab: string = 'general';
   private slidesSubTab: string = 'user';
   private expandedSections: Set<string> = new Set(['core', 'community_overview']);
+  private historicalYears: number[] = [];
+
+  oninit(vnode: Mithril.Vnode<any, any>) {
+    super.oninit(vnode);
+    this.loadHistoricalYears();
+  }
+
+  async loadHistoricalYears() {
+    try {
+      const response = await app.request<{ years: Array<{ year: number }> }>({
+        method: 'POST',
+        url: app.forum.attribute('apiUrl') + '/rw-snaps/year-stats',
+      });
+      if (response && response.years) {
+        this.historicalYears = response.years.map((y) => Number(y.year)).filter((y) => !isNaN(y) && y >= 2000 && y <= 2100);
+        m.redraw();
+      }
+    } catch {
+      // Gracefully fall back to local years
+    }
+  }
 
   saveSettings(e: SaveSubmitEvent) {
     const yearRaw = this.setting('huseyinfiliz-rewind.active_year')();
@@ -684,7 +705,12 @@ export default class RewindSettingsPage extends ExtensionPage {
 
   getAllDisplayYears(): number[] {
     const activeYear = parseInt(this.setting('huseyinfiliz-rewind.active_year')() || '2025', 10);
-    const set = new Set<number>([activeYear, activeYear - 1, activeYear - 2, activeYear - 3]);
+    const set = new Set<number>([activeYear]);
+
+    this.historicalYears.forEach((y) => {
+      set.add(y);
+    });
+
     const modes = this.getYearModes();
     Object.keys(modes).forEach((y) => {
       const parsed = parseInt(y, 10);
