@@ -491,16 +491,14 @@ export default class RewindSettingsPage extends ExtensionPage {
                         <span className="RewindSettings-pathBadge">Active</span>
                       )}
                     </div>
-                    <div className="RewindSettings-yearModeSelect">
-                      <Select
-                        value={currentMode || 'slideshow'}
-                        options={{
-                          slideshow: app.translator.trans('huseyinfiliz-rewind.admin.settings.render_mode_slideshow') as string,
-                          blade: app.translator.trans('huseyinfiliz-rewind.admin.settings.render_mode_blade') as string,
-                        }}
-                        onchange={(mode: string) => this.setYearMode(year, mode)}
-                      />
-                    </div>
+                    <Select
+                      value={currentMode || 'slideshow'}
+                      options={{
+                        slideshow: app.translator.trans('huseyinfiliz-rewind.admin.settings.render_mode_slideshow') as string,
+                        blade: app.translator.trans('huseyinfiliz-rewind.admin.settings.render_mode_blade') as string,
+                      }}
+                      onchange={(mode: string) => this.setYearMode(year, mode)}
+                    />
                   </div>
                 );
               })}
