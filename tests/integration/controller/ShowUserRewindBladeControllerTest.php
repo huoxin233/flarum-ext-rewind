@@ -13,7 +13,6 @@ namespace HuseyinFiliz\Rewind\Tests\integration\controller;
 
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class ShowUserRewindBladeControllerTest extends TestCase
 {
@@ -73,7 +72,7 @@ class ShowUserRewindBladeControllerTest extends TestCase
         ]);
     }
 
-    #[Test]
+    /** @test */
     public function user_can_view_public_rewind_blade_page()
     {
         $response = $this->send(
@@ -87,7 +86,7 @@ class ShowUserRewindBladeControllerTest extends TestCase
         $this->assertStringContainsString('normal', $body);
     }
 
-    #[Test]
+    /** @test */
     public function user_can_view_own_private_rewind_blade_page()
     {
         $response = $this->send(
@@ -100,7 +99,7 @@ class ShowUserRewindBladeControllerTest extends TestCase
         $this->assertStringContainsString('10', $body);
     }
 
-    #[Test]
+    /** @test */
     public function other_user_cannot_view_private_rewind_blade_page()
     {
         $response = $this->send(
@@ -112,7 +111,7 @@ class ShowUserRewindBladeControllerTest extends TestCase
         $this->assertStringContainsString('Private Rewind', $body);
     }
 
-    #[Test]
+    /** @test */
     public function moderator_can_view_private_rewind_blade_page()
     {
         $response = $this->send(
@@ -124,7 +123,7 @@ class ShowUserRewindBladeControllerTest extends TestCase
         $this->assertStringContainsString('alice', $body);
     }
 
-    #[Test]
+    /** @test */
     public function returns_404_when_snapshot_does_not_exist()
     {
         $response = $this->send(
@@ -136,7 +135,7 @@ class ShowUserRewindBladeControllerTest extends TestCase
         $this->assertStringContainsString('Rewind Not Found', $body);
     }
 
-    #[Test]
+    /** @test */
     public function returns_400_for_invalid_year_or_id()
     {
         $response = $this->send(
@@ -146,7 +145,7 @@ class ShowUserRewindBladeControllerTest extends TestCase
         $this->assertEquals(400, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function returns_403_when_rewind_is_disabled()
     {
         $this->setting('huseyinfiliz-rewind.enabled', false);
@@ -160,7 +159,7 @@ class ShowUserRewindBladeControllerTest extends TestCase
         $this->assertStringContainsString('Rewind is currently disabled', $body);
     }
 
-    #[Test]
+    /** @test */
     public function slideshow_mode_delegates_to_frontend_document()
     {
         $this->setting('huseyinfiliz-rewind.year_render_modes', json_encode(['2025' => 'slideshow']));

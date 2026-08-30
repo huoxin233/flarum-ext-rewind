@@ -44,20 +44,50 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
 
         $yearModes = json_decode((string) $this->settings->get('huseyinfiliz-rewind.year_render_modes', '{}'), true) ?: [];
         $renderMode = $yearModes[(string) $year] ?? 'slideshow';
+        $forumTitle = (string) $this->settings->get('forum_title', 'Flarum');
+        $baseUrl = rtrim($this->url->to('forum')->base(), '/');
 
-        if ($renderMode === 'slideshow' && $this->container->has('flarum.frontend.forum')) {
-            /** @var Frontend $frontend */
-            $frontend = $this->container->make('flarum.frontend.forum');
+        if ($renderMode === 'slideshow') {
+            if ($this->container->has('flarum.frontend.forum')) {
+                try {
+                    /** @var Frontend $frontend */
+                    $frontend = $this->container->make('flarum.frontend.forum');
+                    $document = $frontend->document($request);
 
-            return new HtmlResponse($frontend->document($request)->render());
+                    if (method_exists($document, 'render')) {
+                        return new HtmlResponse($document->render(), 200);
+                    }
+
+                    if ($this->container->has('view')) {
+                        $view = $this->container->make('view');
+                        $viewNames = [
+                            'flarum.forum::frontend.app',
+                            'flarum.forum::app',
+                            'flarum.forum::frontend.forum',
+                            'flarum.frontend::frontend',
+                            'flarum.frontend::app',
+                            'flarum::frontend.app',
+                            'flarum::app',
+                        ];
+
+                        foreach ($viewNames as $name) {
+                            if ($view->exists($name)) {
+                                return new HtmlResponse($view->make($name, ['document' => $document])->render(), 200);
+                            }
+                        }
+                    }
+                } catch (\Throwable $e) {
+                    // Fallback below
+                }
+            }
+
+            return new HtmlResponse('<!DOCTYPE html><html><head><title>' . htmlspecialchars($forumTitle) . '</title></head><body><div id="app"></div><div id="flarum"></div></body></html>', 200);
         }
 
         $actor = RequestUtil::getActor($request);
 
         $enabled = (bool) $this->settings->get('huseyinfiliz-rewind.enabled', false);
         $canModerate = $actor->hasPermission('huseyinfiliz-rewind.moderate');
-        $forumTitle = (string) $this->settings->get('forum_title', 'Flarum');
-        $baseUrl = rtrim($this->url->to('forum')->base(), '/');
 
         if (! $enabled && ! $canModerate) {
             return $this->renderError(

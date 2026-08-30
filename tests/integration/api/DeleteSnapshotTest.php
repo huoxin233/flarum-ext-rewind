@@ -5,7 +5,6 @@ namespace HuseyinFiliz\Rewind\Tests\integration\api;
 use Carbon\Carbon;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class DeleteSnapshotTest extends TestCase
 {
@@ -39,7 +38,7 @@ class DeleteSnapshotTest extends TestCase
         ]);
     }
 
-    #[Test]
+    /** @test */
     public function owner_cannot_delete_own_snapshot()
     {
         $response = $this->send(
@@ -49,7 +48,7 @@ class DeleteSnapshotTest extends TestCase
         $this->assertEquals(403, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function moderator_can_delete()
     {
         $response = $this->send(
@@ -59,7 +58,7 @@ class DeleteSnapshotTest extends TestCase
         $this->assertEquals(204, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function admin_can_delete()
     {
         $response = $this->send(

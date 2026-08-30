@@ -1,10 +1,8 @@
 import app from 'flarum/admin/app';
 import ExtensionPage from 'flarum/admin/components/ExtensionPage';
-import type { SaveSubmitEvent } from 'flarum/admin/components/AdminPage';
 import Button from 'flarum/common/components/Button';
 import Switch from 'flarum/common/components/Switch';
 import Select from 'flarum/common/components/Select';
-import Form from 'flarum/common/components/Form';
 import GenerateModal from './GenerateModal';
 import type { GenerateStep } from './GenerateModal';
 import type Mithril from 'mithril';
@@ -90,7 +88,7 @@ export default class RewindSettingsPage extends ExtensionPage {
     }
   }
 
-  saveSettings(e: SaveSubmitEvent) {
+  saveSettings(e: any) {
     const yearRaw = this.setting('huseyinfiliz-rewind.active_year')();
     const yearVal = Number(yearRaw);
     if (!yearVal || !Number.isInteger(yearVal) || yearVal < 2000 || yearVal > 2100) {
@@ -137,7 +135,7 @@ export default class RewindSettingsPage extends ExtensionPage {
 
   generalTab(): Mithril.Children {
     return (
-      <Form>
+      <div className="Form">
         <div className="Form-group">
           {this.buildSettingComponent({
             type: 'boolean',
@@ -165,13 +163,13 @@ export default class RewindSettingsPage extends ExtensionPage {
           <p className="helpText">{app.translator.trans('huseyinfiliz-rewind.admin.settings.community_comparison_help')}</p>
         </div>
         <div className="Form-group">{this.submitButton()}</div>
-      </Form>
+      </div>
     );
   }
 
   slidesTab(): Mithril.Children {
     return (
-      <Form>
+      <div className="Form">
         <div className="RewindSettings-metricsPills">
           <button
             className={'RewindSettings-pill' + (this.slidesSubTab === 'user' ? ' active' : '')}
@@ -197,7 +195,7 @@ export default class RewindSettingsPage extends ExtensionPage {
         {this.slidesSubTab === 'community' &&
           this.renderSlideToggles(COMMUNITY_SLIDE_SECTIONS, 'huseyinfiliz-rewind.hidden_community_slides', 'community_slide')}
         <div className="Form-group">{this.submitButton()}</div>
-      </Form>
+      </div>
     );
   }
 
@@ -324,7 +322,7 @@ export default class RewindSettingsPage extends ExtensionPage {
   openCommunityGenerateModal() {
     const activeYear = parseInt(app.data.settings['huseyinfiliz-rewind.active_year'] as string, 10) || new Date().getFullYear();
 
-    app.modal.show(GenerateModal, {
+    app.modal.show(GenerateModal as any, {
       title: app.translator.trans('huseyinfiliz-rewind.admin.generate_modal.community_title') as string,
       configFields: [
         {
@@ -354,7 +352,7 @@ export default class RewindSettingsPage extends ExtensionPage {
   openUserBatchGenerateModal() {
     const activeYear = parseInt(app.data.settings['huseyinfiliz-rewind.active_year'] as string, 10) || new Date().getFullYear();
 
-    app.modal.show(GenerateModal, {
+    app.modal.show(GenerateModal as any, {
       title: app.translator.trans('huseyinfiliz-rewind.admin.generate_modal.users_title') as string,
       configFields: [
         {
@@ -392,7 +390,7 @@ export default class RewindSettingsPage extends ExtensionPage {
   }
 
   openDeleteRewindsModal() {
-    app.modal.show(GenerateModal, {
+    app.modal.show(GenerateModal as any, {
       title: app.translator.trans('huseyinfiliz-rewind.admin.generate_modal.delete_title') as string,
       confirmMode: true,
       confirmLabel: app.translator.trans('huseyinfiliz-rewind.admin.generate_modal.delete_confirm') as string,
@@ -430,7 +428,7 @@ export default class RewindSettingsPage extends ExtensionPage {
     const activeYear = parseInt(this.setting('huseyinfiliz-rewind.active_year')() || currentYearStr, 10);
 
     return (
-      <Form>
+      <div className="Form">
         <div className="RewindSettings-templates">
           <div className="RewindSettings-infoCard">
             <div className="RewindSettings-infoCardHeader">
@@ -662,7 +660,7 @@ export default class RewindSettingsPage extends ExtensionPage {
             </div>
           </div>
         </div>
-      </Form>
+      </div>
     );
   }
 

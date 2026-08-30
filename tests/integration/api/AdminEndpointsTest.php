@@ -5,7 +5,6 @@ namespace HuseyinFiliz\Rewind\Tests\integration\api;
 use Carbon\Carbon;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class AdminEndpointsTest extends TestCase
 {
@@ -46,7 +45,7 @@ class AdminEndpointsTest extends TestCase
         ]);
     }
 
-    #[Test]
+    /** @test */
     public function admin_can_generate_for_user()
     {
         $response = $this->send(
@@ -62,7 +61,7 @@ class AdminEndpointsTest extends TestCase
         $this->assertEquals('rw-snaps', $body['data']['type']);
     }
 
-    #[Test]
+    /** @test */
     public function non_admin_cannot_generate_for_user()
     {
         $response = $this->send(
@@ -75,7 +74,7 @@ class AdminEndpointsTest extends TestCase
         $this->assertEquals(403, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function generate_for_user_requires_valid_user_id()
     {
         $response = $this->send(
@@ -88,7 +87,7 @@ class AdminEndpointsTest extends TestCase
         $this->assertEquals(422, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function admin_can_get_missing_users()
     {
         $response = $this->send(
@@ -110,7 +109,7 @@ class AdminEndpointsTest extends TestCase
         $this->assertNotContains(2, $missingIds);
     }
 
-    #[Test]
+    /** @test */
     public function admin_can_get_year_stats()
     {
         $response = $this->send(
@@ -128,7 +127,7 @@ class AdminEndpointsTest extends TestCase
         $this->assertEquals(1, $body['years'][0]['count']);
     }
 
-    #[Test]
+    /** @test */
     public function admin_can_get_groups()
     {
         $response = $this->send(
@@ -144,7 +143,7 @@ class AdminEndpointsTest extends TestCase
         $this->assertNotEmpty($body['groups']);
     }
 
-    #[Test]
+    /** @test */
     public function admin_can_batch_delete()
     {
         $response = $this->send(
@@ -160,7 +159,7 @@ class AdminEndpointsTest extends TestCase
         $this->assertEquals(1, $body['deleted']);
     }
 
-    #[Test]
+    /** @test */
     public function batch_delete_validates_year()
     {
         $response = $this->send(

@@ -5,7 +5,6 @@ namespace HuseyinFiliz\Rewind\Tests\integration\api;
 use Carbon\Carbon;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class SnapshotVisibilityTest extends TestCase
 {
@@ -45,7 +44,7 @@ class SnapshotVisibilityTest extends TestCase
         ]);
     }
 
-    #[Test]
+    /** @test */
     public function public_snapshot_data_visible_to_anyone()
     {
         $response = $this->send(
@@ -59,7 +58,7 @@ class SnapshotVisibilityTest extends TestCase
         $this->assertEquals(10, $body['data']['attributes']['data']['post_count']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function private_snapshot_data_hidden_from_others()
     {
         $response = $this->send(
@@ -73,7 +72,7 @@ class SnapshotVisibilityTest extends TestCase
         $this->assertNull($body['data']['attributes']['data']);
     }
 
-    #[Test]
+    /** @test */
     public function private_snapshot_data_visible_to_owner()
     {
         $response = $this->send(
@@ -87,7 +86,7 @@ class SnapshotVisibilityTest extends TestCase
         $this->assertEquals(5, $body['data']['attributes']['data']['post_count']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function private_snapshot_data_visible_to_moderator()
     {
         $response = $this->send(
@@ -100,7 +99,7 @@ class SnapshotVisibilityTest extends TestCase
         $this->assertNotNull($body['data']['attributes']['data']);
     }
 
-    #[Test]
+    /** @test */
     public function isEmpty_field_correct_for_empty_snapshot()
     {
         $response = $this->send(
@@ -113,7 +112,7 @@ class SnapshotVisibilityTest extends TestCase
         $this->assertTrue($body['data']['attributes']['isEmpty']);
     }
 
-    #[Test]
+    /** @test */
     public function isEmpty_field_correct_for_populated_snapshot()
     {
         $response = $this->send(
@@ -126,7 +125,7 @@ class SnapshotVisibilityTest extends TestCase
         $this->assertFalse($body['data']['attributes']['isEmpty']);
     }
 
-    #[Test]
+    /** @test */
     public function canEdit_true_for_owner()
     {
         $response = $this->send(
@@ -137,7 +136,7 @@ class SnapshotVisibilityTest extends TestCase
         $this->assertTrue($body['data']['attributes']['canEdit']);
     }
 
-    #[Test]
+    /** @test */
     public function canEdit_false_for_other_user()
     {
         $response = $this->send(
@@ -148,7 +147,7 @@ class SnapshotVisibilityTest extends TestCase
         $this->assertFalse($body['data']['attributes']['canEdit']);
     }
 
-    #[Test]
+    /** @test */
     public function canModerate_true_for_moderator()
     {
         $response = $this->send(
@@ -159,7 +158,7 @@ class SnapshotVisibilityTest extends TestCase
         $this->assertTrue($body['data']['attributes']['canModerate']);
     }
 
-    #[Test]
+    /** @test */
     public function canModerate_false_for_normal_user()
     {
         $response = $this->send(

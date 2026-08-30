@@ -5,7 +5,6 @@ namespace HuseyinFiliz\Rewind\Tests\integration\api;
 use Carbon\Carbon;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class UpdateSnapshotTest extends TestCase
 {
@@ -40,7 +39,7 @@ class UpdateSnapshotTest extends TestCase
         ]);
     }
 
-    #[Test]
+    /** @test */
     public function owner_can_toggle_public()
     {
         $response = $this->send(
@@ -62,7 +61,7 @@ class UpdateSnapshotTest extends TestCase
         $this->assertFalse($body['data']['attributes']['isPublic']);
     }
 
-    #[Test]
+    /** @test */
     public function other_user_cannot_update()
     {
         $response = $this->send(
@@ -81,7 +80,7 @@ class UpdateSnapshotTest extends TestCase
         $this->assertEquals(403, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function guest_cannot_update()
     {
         $response = $this->send(

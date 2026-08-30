@@ -3,21 +3,20 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../vendor/phpunit/phpunit/phpunit.xsd"
     backupGlobals="false"
-    cacheDirectory=".phpunit.cache"
-    backupStaticProperties="false"
+    backupStaticAttributes="false"
     colors="true"
     processIsolation="true"
     stopOnFailure="false"
 >
-    <source>
+    <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">../src/</directory>
         </include>
-    </source>
+    </coverage>
     <testsuites>
         <testsuite name="Flarum Integration Tests">
             <directory suffix="Test.php">./integration</directory>
-             <exclude>./integration/tmp</exclude>
+            <exclude>./integration/tmp</exclude>
         </testsuite>
     </testsuites>
     <php>

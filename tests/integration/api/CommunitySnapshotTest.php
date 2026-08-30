@@ -4,7 +4,6 @@ namespace HuseyinFiliz\Rewind\Tests\integration\api;
 
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class CommunitySnapshotTest extends TestCase
 {
@@ -46,7 +45,7 @@ class CommunitySnapshotTest extends TestCase
         ]);
     }
 
-    #[Test]
+    /** @test */
     public function member_can_list_community_snapshots()
     {
         $response = $this->send(
@@ -56,7 +55,7 @@ class CommunitySnapshotTest extends TestCase
         $this->assertEquals(200, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function admin_can_generate_community_snapshot()
     {
         $response = $this->send(
@@ -69,7 +68,7 @@ class CommunitySnapshotTest extends TestCase
         $this->assertArrayHasKey('data', $body);
     }
 
-    #[Test]
+    /** @test */
     public function non_admin_cannot_generate_community()
     {
         $response = $this->send(
@@ -79,7 +78,7 @@ class CommunitySnapshotTest extends TestCase
         $this->assertEquals(403, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function generated_community_has_correct_total_posts()
     {
         $response = $this->send(
@@ -92,7 +91,7 @@ class CommunitySnapshotTest extends TestCase
         $this->assertEquals(4, $data['total_posts']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function generated_community_has_correct_total_discussions()
     {
         $response = $this->send(
@@ -105,7 +104,7 @@ class CommunitySnapshotTest extends TestCase
         $this->assertEquals(2, $data['total_discussions']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function generated_community_has_top_contributors()
     {
         $response = $this->send(
@@ -124,7 +123,7 @@ class CommunitySnapshotTest extends TestCase
         $this->assertContains(4, $userIds);
     }
 
-    #[Test]
+    /** @test */
     public function admin_can_get_generate_steps()
     {
         $response = $this->send(
@@ -138,7 +137,7 @@ class CommunitySnapshotTest extends TestCase
         $this->assertNotEmpty($body['steps']);
     }
 
-    #[Test]
+    /** @test */
     public function admin_can_generate_single_step()
     {
         $response = $this->send(

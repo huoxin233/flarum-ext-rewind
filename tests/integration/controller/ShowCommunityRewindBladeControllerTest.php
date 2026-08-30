@@ -13,7 +13,6 @@ namespace HuseyinFiliz\Rewind\Tests\integration\controller;
 
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class ShowCommunityRewindBladeControllerTest extends TestCase
 {
@@ -54,7 +53,7 @@ class ShowCommunityRewindBladeControllerTest extends TestCase
         ]);
     }
 
-    #[Test]
+    /** @test */
     public function user_can_view_community_rewind_blade_page()
     {
         $response = $this->send(
@@ -68,7 +67,7 @@ class ShowCommunityRewindBladeControllerTest extends TestCase
         $this->assertStringContainsString('150', $body);
     }
 
-    #[Test]
+    /** @test */
     public function default_community_view_uses_active_year()
     {
         $response = $this->send(
@@ -80,7 +79,7 @@ class ShowCommunityRewindBladeControllerTest extends TestCase
         $this->assertStringContainsString('2025 Forum Rewind', $body);
     }
 
-    #[Test]
+    /** @test */
     public function returns_404_when_community_snapshot_missing()
     {
         $response = $this->send(
@@ -92,7 +91,7 @@ class ShowCommunityRewindBladeControllerTest extends TestCase
         $this->assertStringContainsString('Community Rewind Not Found', $body);
     }
 
-    #[Test]
+    /** @test */
     public function returns_403_when_disabled()
     {
         $this->setting('huseyinfiliz-rewind.enabled', false);
@@ -104,7 +103,7 @@ class ShowCommunityRewindBladeControllerTest extends TestCase
         $this->assertEquals(403, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function slideshow_mode_delegates_to_frontend_document()
     {
         $this->setting('huseyinfiliz-rewind.year_render_modes', json_encode(['2025' => 'slideshow']));

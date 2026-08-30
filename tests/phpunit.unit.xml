@@ -1,19 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+    xsi:noNamespaceSchemaLocation="../vendor/phpunit/phpunit/phpunit.xsd"
     backupGlobals="false"
-    cacheDirectory=".phpunit.cache"
-    backupStaticProperties="false"
+    backupStaticAttributes="false"
     colors="true"
     processIsolation="false"
     stopOnFailure="false"
 >
-    <source>
+    <coverage processUncoveredFiles="true">
         <include>
             <directory suffix=".php">../src/</directory>
         </include>
-    </source>
+    </coverage>
     <testsuites>
         <testsuite name="Flarum Unit Tests">
             <directory suffix="Test.php">./unit</directory>

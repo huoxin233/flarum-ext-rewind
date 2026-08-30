@@ -1,7 +1,7 @@
 import app from 'flarum/forum/app';
 import Page from 'flarum/common/components/Page';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
-import Avatar from 'flarum/common/components/Avatar';
+import avatar from 'flarum/common/helpers/avatar';
 import extractText from 'flarum/common/utils/extractText';
 import { animate, stagger, createTimeline, random } from 'animejs';
 import { animateBignum } from '../animators/bignum';
@@ -606,7 +606,7 @@ export default class SlideshowPage extends Page {
         <div className="rw-intro-orbs" />
         {user && (
           <div className="rw-intro-avatar" style={{ opacity: 0 }}>
-            <Avatar user={user} />
+            {avatar(user as any)}
           </div>
         )}
         <div className="rw-intro-year">{year}</div>
@@ -759,7 +759,7 @@ export default class SlideshowPage extends Page {
           <div className="rw-post-preview">
             <div className="rw-post-preview-header">
               <div className="rw-post-preview-left">
-                {user && <Avatar user={user} />}
+                {user && avatar(user as any)}
                 <span className="rw-post-preview-name">{user?.displayName() || ''}</span>
               </div>
               <span className="rw-post-preview-disc">{title}</span>
@@ -927,8 +927,8 @@ export default class SlideshowPage extends Page {
 
   renderPersonContent(key: string, data: Record<string, any>): Mithril.Children {
     const name = data.display_name || data.username || '—';
-    const friend = data.user_id ? app.store.getById('users', String(data.user_id)) : null;
-    const owner = this.snapshot?.user() || null;
+    const friend = data.user_id ? (app.store.getById('users', String(data.user_id)) as any) : null;
+    const owner = this.snapshot?.user() as any;
 
     if (key === 'best_friend') {
       const stats = [
@@ -945,12 +945,8 @@ export default class SlideshowPage extends Page {
       return (
         <div className="rw-person-layout rw-person-layout--friend">
           <div className="rw-person-duo">
-            <div className="rw-person-duo-avatar rw-person-duo-avatar--owner">
-              {owner ? <Avatar user={owner} /> : <i className="fas fa-user-circle" />}
-            </div>
-            <div className="rw-person-duo-avatar rw-person-duo-avatar--friend">
-              {friend ? <Avatar user={friend} /> : <i className="fas fa-user-circle" />}
-            </div>
+            <div className="rw-person-duo-avatar rw-person-duo-avatar--owner">{owner ? avatar(owner) : <i className="fas fa-user-circle" />}</div>
+            <div className="rw-person-duo-avatar rw-person-duo-avatar--friend">{friend ? avatar(friend) : <i className="fas fa-user-circle" />}</div>
           </div>
           <div className="rw-person-name" style={{ opacity: 1 }}>
             {this.splitText(name, 'rw-person-char')}
@@ -969,14 +965,14 @@ export default class SlideshowPage extends Page {
     }
 
     if (key === 'best_friend_mentions') {
-      const mentionedByUser = data.mentioned_by_user_id ? app.store.getById('users', String(data.mentioned_by_user_id)) : null;
+      const mentionedByUser = data.mentioned_by_user_id ? (app.store.getById('users', String(data.mentioned_by_user_id)) as any) : null;
 
       return (
         <div className="rw-person-layout rw-person-layout--mentions">
           <div className="rw-mention-cards">
             {data.user_id && (
               <div className="rw-mention-card" style={{ opacity: 0 }}>
-                <div className="rw-mention-card-avatar">{friend ? <Avatar user={friend} /> : <i className="fas fa-user-circle" />}</div>
+                <div className="rw-mention-card-avatar">{friend ? avatar(friend) : <i className="fas fa-user-circle" />}</div>
                 <div className="rw-mention-card-info">
                   <span className="rw-mention-card-name">{data.display_name || data.username}</span>
                   <span className="rw-mention-card-stat">
@@ -988,9 +984,7 @@ export default class SlideshowPage extends Page {
             )}
             {data.mentioned_by_user_id && (
               <div className="rw-mention-card" style={{ opacity: 0 }}>
-                <div className="rw-mention-card-avatar">
-                  {mentionedByUser ? <Avatar user={mentionedByUser} /> : <i className="fas fa-user-circle" />}
-                </div>
+                <div className="rw-mention-card-avatar">{mentionedByUser ? avatar(mentionedByUser) : <i className="fas fa-user-circle" />}</div>
                 <div className="rw-mention-card-info">
                   <span className="rw-mention-card-name">{data.mentioned_by_username}</span>
                   <span className="rw-mention-card-stat">
@@ -1008,7 +1002,7 @@ export default class SlideshowPage extends Page {
     return (
       <div className="rw-person-layout">
         <div className="rw-person-avatar" style={{ opacity: 0 }}>
-          {friend ? <Avatar user={friend} /> : <i className="fas fa-user-circle" />}
+          {friend ? avatar(friend) : <i className="fas fa-user-circle" />}
         </div>
         <div className="rw-person-name" style={{ opacity: 1 }}>
           {this.splitText(name, 'rw-person-char')}

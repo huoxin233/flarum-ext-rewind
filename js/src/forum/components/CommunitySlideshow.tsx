@@ -1,7 +1,7 @@
 import app from 'flarum/forum/app';
 import Page from 'flarum/common/components/Page';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
-import Avatar from 'flarum/common/components/Avatar';
+import avatar from 'flarum/common/helpers/avatar';
 import extractText from 'flarum/common/utils/extractText';
 import { animate, stagger, createTimeline } from 'animejs';
 import { animateClock } from '../animators/clock';
@@ -656,11 +656,11 @@ export default class CommunitySlideshow extends Page {
   }
 
   renderUserCard(userId: number, username: string, subtitle: string, index: number): Mithril.Children {
-    const user = app.store.getById('users', String(userId));
+    const user = app.store.getById('users', String(userId)) as any;
     return (
       <div className="rw-user-card" key={userId} style={{ opacity: 0 }}>
         <div className="rw-user-card-rank">#{index + 1}</div>
-        <div className="rw-user-card-avatar">{user ? <Avatar user={user} /> : <i className="fas fa-user-circle" />}</div>
+        <div className="rw-user-card-avatar">{user ? avatar(user) : <i className="fas fa-user-circle" />}</div>
         <div className="rw-user-card-info">
           <span className="rw-user-card-name">{username}</span>
           <span className="rw-user-card-stat">{subtitle}</span>
@@ -701,7 +701,7 @@ export default class CommunitySlideshow extends Page {
 
   renderStarPost(): Mithril.Children {
     const d = this.data!.star_post;
-    const user = d.user_id ? app.store.getById('users', String(d.user_id)) : null;
+    const user = d.user_id ? (app.store.getById('users', String(d.user_id)) as any) : null;
     return (
       <div className="rw-metric-slide rw-metric-slide--community">
         <div className="rw-slide-header">
@@ -711,7 +711,7 @@ export default class CommunitySlideshow extends Page {
         <div className="rw-post-preview" style={{ opacity: 0 }}>
           <div className="rw-post-preview-header">
             <div className="rw-post-preview-left">
-              {user && <Avatar user={user} />}
+              {user && avatar(user)}
               <span className="rw-post-preview-name">{d.username}</span>
             </div>
             <span className="rw-post-preview-disc">{d.discussion_title}</span>
@@ -727,7 +727,7 @@ export default class CommunitySlideshow extends Page {
 
   renderTopDiscussion(): Mithril.Children {
     const d = this.data!.top_discussion;
-    const author = d.author_id ? app.store.getById('users', String(d.author_id)) : null;
+    const author = d.author_id ? (app.store.getById('users', String(d.author_id)) as any) : null;
     return (
       <div className="rw-metric-slide rw-metric-slide--community">
         <div className="rw-slide-header">
@@ -739,7 +739,7 @@ export default class CommunitySlideshow extends Page {
         <div className="rw-post-preview" style={{ opacity: 0 }}>
           <div className="rw-post-preview-header">
             <div className="rw-post-preview-left">
-              {author && <Avatar user={author} />}
+              {author && avatar(author)}
               <span className="rw-post-preview-name">{d.author_username || ''}</span>
             </div>
           </div>
@@ -810,10 +810,10 @@ export default class CommunitySlideshow extends Page {
         </div>
         <div className="rw-members-avatars">
           {(d.recent || []).map((u: any) => {
-            const user = app.store.getById('users', String(u.user_id));
+            const user = app.store.getById('users', String(u.user_id)) as any;
             return (
               <div className="rw-members-avatar" key={u.user_id}>
-                {user ? <Avatar user={user} /> : <i className="fas fa-user-circle" />}
+                {user ? avatar(user) : <i className="fas fa-user-circle" />}
               </div>
             );
           })}

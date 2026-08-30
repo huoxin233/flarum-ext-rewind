@@ -5,7 +5,6 @@ namespace HuseyinFiliz\Rewind\Tests\integration\api;
 use Carbon\Carbon;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class GenerateSnapshotTest extends TestCase
 {
@@ -62,7 +61,7 @@ class GenerateSnapshotTest extends TestCase
         ];
     }
 
-    #[Test]
+    /** @test */
     public function guest_cannot_generate()
     {
         $response = $this->send(
@@ -72,7 +71,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertNotEquals(201, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function member_without_permission_cannot_generate()
     {
         // User 4 (alice) is a member, but let's remove generate permission
@@ -87,7 +86,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(403, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function member_can_generate_snapshot()
     {
         $result = $this->generateAs(2);
@@ -98,7 +97,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(2025, $result['body']['data']['attributes']['year']);
     }
 
-    #[Test]
+    /** @test */
     public function generated_snapshot_has_correct_post_count()
     {
         $result = $this->generateAs(2);
@@ -107,7 +106,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(5, $data['post_count']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function generated_snapshot_has_correct_discussion_count()
     {
         $result = $this->generateAs(2);
@@ -116,7 +115,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(1, $data['discussion_count']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function generated_snapshot_has_correct_active_days()
     {
         $result = $this->generateAs(2);
@@ -126,7 +125,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(5, $data['active_days']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function generated_snapshot_has_correct_most_active_month()
     {
         $result = $this->generateAs(2);
@@ -140,7 +139,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(0, $data['most_active_month']['months'][6]); // June (no posts from user 2)
     }
 
-    #[Test]
+    /** @test */
     public function generated_snapshot_has_night_owl_data()
     {
         $result = $this->generateAs(2);
@@ -153,7 +152,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertGreaterThan(0, $data['night_owl']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function generated_snapshot_has_word_count()
     {
         $result = $this->generateAs(2);
@@ -163,7 +162,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertGreaterThan(0, $data['word_count']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function generated_snapshot_excludes_other_year_posts()
     {
         $result = $this->generateAs(2);
@@ -173,7 +172,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(5, $data['post_count']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function generated_snapshot_excludes_other_users_posts()
     {
         $result = $this->generateAs(2);
@@ -183,7 +182,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(5, $data['post_count']['count']);
     }
 
-    #[Test]
+    /** @test */
     public function regenerate_blocked_without_moderate_permission()
     {
         // First generate
@@ -200,7 +199,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(403, $result['status']);
     }
 
-    #[Test]
+    /** @test */
     public function moderator_can_regenerate()
     {
         // First generate for mod
@@ -217,7 +216,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(201, $second['status']);
     }
 
-    #[Test]
+    /** @test */
     public function rate_limit_prevents_rapid_generation()
     {
         // Generate for mod (mod can regenerate, so only rate limit blocks)
@@ -229,7 +228,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(422, $second['status']);
     }
 
-    #[Test]
+    /** @test */
     public function disabled_feature_blocks_generation()
     {
         $this->setting('huseyinfiliz-rewind.enabled', false);
@@ -241,7 +240,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertEquals(403, $response->getStatusCode());
     }
 
-    #[Test]
+    /** @test */
     public function generated_snapshot_has_top_words()
     {
         $result = $this->generateAs(2);
@@ -251,7 +250,7 @@ class GenerateSnapshotTest extends TestCase
         $this->assertArrayHasKey('words', $data['top_words']);
     }
 
-    #[Test]
+    /** @test */
     public function generated_snapshot_has_best_post()
     {
         $result = $this->generateAs(2);

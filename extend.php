@@ -11,22 +11,15 @@
 
 namespace HuseyinFiliz\Rewind;
 
-use Flarum\Api\Context;
-use Flarum\Api\Resource;
-use Flarum\Api\Schema;
+use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
-use Flarum\Search\Database\DatabaseSearchDriver;
-use HuseyinFiliz\Rewind\Api\Resource\CommunitySnapshotResource;
-use HuseyinFiliz\Rewind\Api\Resource\RewindSnapshotResource;
+use HuseyinFiliz\Rewind\Api\Controller;
 use HuseyinFiliz\Rewind\Http\Controller\ShowCommunityRewindBladeController;
 use HuseyinFiliz\Rewind\Http\Controller\ShowUserRewindBladeController;
-use HuseyinFiliz\Rewind\Model\CommunitySnapshot;
-use HuseyinFiliz\Rewind\Model\RewindSnapshot;
 
 return [
     (new Extend\Frontend('forum'))
         ->js(__DIR__.'/js/dist/forum.js')
-        ->jsDirectory(__DIR__.'/js/dist/forum')
         ->css(__DIR__.'/less/forum.less')
         ->route('/rewind', 'huseyinfiliz-rewind.forum')
         ->route('/u/{username}/rewind', 'huseyinfiliz-rewind.profile'),
@@ -48,26 +41,28 @@ return [
     (new Extend\ServiceProvider())
         ->register(RewindServiceProvider::class),
 
-    new Extend\ApiResource(RewindSnapshotResource::class),
+    (new Extend\Routes('api'))
+        ->get('/rw-snaps', 'huseyinfiliz-rewind.snaps.index', Controller\ListRewindSnapshotsController::class)
+        ->get('/rw-snaps/{id}', 'huseyinfiliz-rewind.snaps.show', Controller\ShowRewindSnapshotController::class)
+        ->patch('/rw-snaps/{id}', 'huseyinfiliz-rewind.snaps.update', Controller\UpdateRewindSnapshotController::class)
+        ->delete('/rw-snaps/{id}', 'huseyinfiliz-rewind.snaps.delete', Controller\DeleteRewindSnapshotController::class)
+        ->post('/rw-snaps/generate', 'huseyinfiliz-rewind.snaps.generate', Controller\GenerateRewindSnapshotController::class)
+        ->post('/rw-snaps/missing-users', 'huseyinfiliz-rewind.snaps.missing-users', Controller\MissingUsersController::class)
+        ->post('/rw-snaps/generate-for-user', 'huseyinfiliz-rewind.snaps.generate-for-user', Controller\GenerateForUserController::class)
+        ->post('/rw-snaps/groups', 'huseyinfiliz-rewind.snaps.groups', Controller\GroupsController::class)
+        ->post('/rw-snaps/year-stats', 'huseyinfiliz-rewind.snaps.year-stats', Controller\YearStatsController::class)
+        ->post('/rw-snaps/batch-delete', 'huseyinfiliz-rewind.snaps.batch-delete', Controller\DeleteBatchController::class)
+        ->post('/rw-snaps/delete-batch', 'huseyinfiliz-rewind.snaps.delete-batch', Controller\DeleteBatchController::class)
+        ->get('/rw-community', 'huseyinfiliz-rewind.community.index', Controller\ListCommunitySnapshotsController::class)
+        ->get('/rw-community/{id}', 'huseyinfiliz-rewind.community.show', Controller\ShowCommunitySnapshotController::class)
+        ->post('/rw-community/generate', 'huseyinfiliz-rewind.community.generate', Controller\GenerateCommunitySnapshotController::class)
+        ->post('/rw-community/generate-steps', 'huseyinfiliz-rewind.community.generate-steps', Controller\GenerateCommunityStepsController::class)
+        ->post('/rw-community/generate-step', 'huseyinfiliz-rewind.community.generate-step', Controller\GenerateCommunityStepController::class),
 
-    new Extend\ApiResource(CommunitySnapshotResource::class),
-
-    (new Extend\ApiResource(Resource\ForumResource::class))
-        ->fields(fn () => [
-            Schema\Boolean::make('canViewRewind')
-                ->get(fn ($model, Context $context) => $context->getActor()->hasPermission('huseyinfiliz-rewind.viewForum')),
-            Schema\Boolean::make('canGenerateRewind')
-                ->get(fn ($model, Context $context) => $context->getActor()->hasPermission('huseyinfiliz-rewind.generate')),
-            Schema\Boolean::make('canModerateRewind')
-                ->get(fn ($model, Context $context) => $context->getActor()->hasPermission('huseyinfiliz-rewind.moderate')),
-        ]),
-
-    (new Extend\SearchDriver(DatabaseSearchDriver::class))
-        ->addSearcher(RewindSnapshot::class, Search\RewindSnapshotSearcher::class)
-        ->addFilter(Search\RewindSnapshotSearcher::class, Search\Filter\UserFilter::class)
-        ->addFilter(Search\RewindSnapshotSearcher::class, Search\Filter\YearFilter::class)
-        ->addSearcher(CommunitySnapshot::class, Search\CommunitySnapshotSearcher::class)
-        ->addFilter(Search\CommunitySnapshotSearcher::class, Search\Filter\YearFilter::class),
+    (new Extend\ApiSerializer(ForumSerializer::class))
+        ->attribute('canViewRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->hasPermission('huseyinfiliz-rewind.viewForum'))
+        ->attribute('canGenerateRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->hasPermission('huseyinfiliz-rewind.generate'))
+        ->attribute('canModerateRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->hasPermission('huseyinfiliz-rewind.moderate')),
 
     (new Extend\Conditional())
         ->whenExtensionEnabled('flarum-likes', fn () => [

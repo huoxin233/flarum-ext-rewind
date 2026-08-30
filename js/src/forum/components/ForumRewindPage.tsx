@@ -1,10 +1,10 @@
 import app from 'flarum/forum/app';
 import Page from 'flarum/common/components/Page';
-import PageStructure from 'flarum/forum/components/PageStructure';
+import IndexPage from 'flarum/forum/components/IndexPage';
 import Button from 'flarum/common/components/Button';
 import Link from 'flarum/common/components/Link';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
-import IndexSidebar from 'flarum/forum/components/IndexSidebar';
+import listItems from 'flarum/common/helpers/listItems';
 import { getYearRenderMode } from '../../common/utils/getYearRenderMode';
 import type Mithril from 'mithril';
 
@@ -149,20 +149,30 @@ export default class ForumRewindPage extends Page {
     }
 
     return (
-      <PageStructure className="RewindPage" hero={() => this.renderHero(enabled, canModerate)} sidebar={() => <IndexSidebar />}>
-        <div className="RewindPage-content">
-          {this.renderToolbar(year, user)}
-          {this.loading || this.loadingContent ? (
-            <div className="RewindPage-contentLoading">
-              <LoadingIndicator />
+      <div className="RewindPage">
+        {this.renderHero(enabled, canModerate)}
+        <div className="container">
+          <div className="sideNavContainer">
+            <nav className="IndexPage-nav sideNav">
+              <ul>{listItems(IndexPage.prototype.sidebarItems().toArray())}</ul>
+            </nav>
+            <div className="IndexPage-results sideNavOffset">
+              <div className="RewindPage-content">
+                {this.renderToolbar(year, user)}
+                {this.loading || this.loadingContent ? (
+                  <div className="RewindPage-contentLoading">
+                    <LoadingIndicator />
+                  </div>
+                ) : this.communitySnapshot ? (
+                  this.renderCommunityStats()
+                ) : (
+                  this.renderNoCommunity()
+                )}
+              </div>
             </div>
-          ) : this.communitySnapshot ? (
-            this.renderCommunityStats()
-          ) : (
-            this.renderNoCommunity()
-          )}
+          </div>
         </div>
-      </PageStructure>
+      </div>
     );
   }
 

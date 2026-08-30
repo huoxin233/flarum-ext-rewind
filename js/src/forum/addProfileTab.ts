@@ -1,10 +1,13 @@
 import app from 'flarum/forum/app';
 import { extend } from 'flarum/common/extend';
 import LinkButton from 'flarum/common/components/LinkButton';
+import UserPage from 'flarum/forum/components/UserPage';
+import ItemList from 'flarum/common/utils/ItemList';
+import type Mithril from 'mithril';
 
 export default function addProfileTab() {
-  extend('flarum/forum/components/UserPage', 'navItems', function (items) {
-    const user = (this as any).user;
+  extend(UserPage.prototype, 'navItems', function (items: ItemList<Mithril.Children>) {
+    const user = this.user;
     if (!user) return;
 
     const canView = app.forum.attribute('canViewRewind');

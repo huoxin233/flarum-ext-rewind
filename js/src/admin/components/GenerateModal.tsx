@@ -1,5 +1,5 @@
 import app from 'flarum/admin/app';
-import Modal, { type IInternalModalAttrs } from 'flarum/common/components/Modal';
+import Modal, { IInternalModalAttrs } from 'flarum/common/components/Modal';
 import Button from 'flarum/common/components/Button';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 import type Mithril from 'mithril';
@@ -67,7 +67,7 @@ export default class GenerateModal extends Modal<GenerateModalAttrs> {
 
     try {
       this.resolvedFields = await Promise.all(
-        fields.map(async (field) => {
+        fields.map(async (field: ConfigField) => {
           if (field.loadOptions && !field.options) {
             const options = await field.loadOptions();
             return { ...field, options };

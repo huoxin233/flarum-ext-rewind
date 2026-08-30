@@ -5,7 +5,6 @@ namespace HuseyinFiliz\Rewind\Tests\integration\api;
 use Carbon\Carbon;
 use Flarum\Testing\integration\RetrievesAuthorizedUsers;
 use Flarum\Testing\integration\TestCase;
-use PHPUnit\Framework\Attributes\Test;
 
 class ListSnapshotsTest extends TestCase
 {
@@ -42,7 +41,7 @@ class ListSnapshotsTest extends TestCase
         ]);
     }
 
-    #[Test]
+    /** @test */
     public function guest_gets_empty_list()
     {
         $response = $this->send(
@@ -55,7 +54,7 @@ class ListSnapshotsTest extends TestCase
         $this->assertEmpty($body['data']);
     }
 
-    #[Test]
+    /** @test */
     public function member_can_list_snapshots_when_enabled()
     {
         $response = $this->send(
@@ -68,7 +67,7 @@ class ListSnapshotsTest extends TestCase
         $this->assertCount(3, $body['data']);
     }
 
-    #[Test]
+    /** @test */
     public function member_cannot_list_when_disabled()
     {
         $this->setting('huseyinfiliz-rewind.enabled', false);
@@ -83,7 +82,7 @@ class ListSnapshotsTest extends TestCase
         $this->assertEmpty($body['data']);
     }
 
-    #[Test]
+    /** @test */
     public function member_can_filter_by_user()
     {
         $response = $this->send(
@@ -99,7 +98,7 @@ class ListSnapshotsTest extends TestCase
         $this->assertGreaterThanOrEqual(2, count($filtered));
     }
 
-    #[Test]
+    /** @test */
     public function member_can_filter_by_year()
     {
         $response = $this->send(
@@ -116,7 +115,7 @@ class ListSnapshotsTest extends TestCase
         $this->assertContains(2024, $years);
     }
 
-    #[Test]
+    /** @test */
     public function moderator_can_list_all_even_when_disabled()
     {
         $this->setting('huseyinfiliz-rewind.enabled', false);
