@@ -1,6 +1,13 @@
 /*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE */
 
 /**
+ * Anime.js - animation - ESM
+ * @version v4.3.6
+ * @license MIT
+ * @copyright 2026 - Julian Garnier
+ */
+
+/**
  * Anime.js - core - ESM
  * @version v4.3.6
  * @license MIT
