@@ -293,8 +293,8 @@ export default class SlideshowPage extends Page {
           this.snapshotData!.best_friend?.user_id,
           this.snapshotData!.best_friend_mentions?.user_id,
           this.snapshotData!.best_friend_mentions?.mentioned_by_user_id,
-        ].filter((id) => id && !app.store.getById('users', String(id)));
-        const unique = [...new Set(userIds)];
+        ].filter((id): id is number => typeof id === 'number' && id > 0 && !app.store.getById('users', String(id)));
+        const unique = userIds.filter((id, index, self) => self.indexOf(id) === index);
         if (unique.length > 0) {
           Promise.all(unique.map((uid) => app.store.find('users', String(uid)).catch(() => null))).then(() => {
             if (!this.isDestroyed) m.redraw();
@@ -372,7 +372,6 @@ export default class SlideshowPage extends Page {
     if (hint) tl.add(hint, { opacity: [0, 0.6], duration: 600 }, 1200);
 
     setTimeout(() => {
-      // Zombi DOM manipülasyonunu engellemek için güvenlik kontrolü
       if (this.isDestroyed || !document.body.contains(root)) return;
 
       const burstContainer = document.createElement('div');
@@ -767,32 +766,32 @@ export default class SlideshowPage extends Page {
             <div className="rw-post-preview-body">{m.trust(contentHtml)}</div>
             <div className="rw-quote-meta">
               {data.metric_type === 'likes' ? (
-                <>
+                <span>
                   <i className="fas fa-heart" /> {data.count}
-                </>
+                </span>
               ) : (
-                <>
+                <span>
                   <i className="fas fa-reply" /> {data.count}
-                </>
+                </span>
               )}
             </div>
           </div>
         ) : (
-          <>
-            <div className="rw-quote-mark">&ldquo;</div>
-            <div className="rw-quote-text">{this.splitText(title, 'rw-quote-char')}</div>
+          [
+            <div className="rw-quote-mark">&ldquo;</div>,
+            <div className="rw-quote-text">{this.splitText(title, 'rw-quote-char')}</div>,
             <div className="rw-quote-meta">
               {data.metric_type === 'likes' ? (
-                <>
+                <span>
                   <i className="fas fa-heart" /> {data.count}
-                </>
+                </span>
               ) : (
-                <>
+                <span>
                   <i className="fas fa-reply" /> {data.count}
-                </>
+                </span>
               )}
-            </div>
-          </>
+            </div>,
+          ]
         )}
       </div>
     );

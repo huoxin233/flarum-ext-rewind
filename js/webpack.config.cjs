@@ -7,4 +7,11 @@ config.optimization = {
   splitChunks: false,
 };
 
+// Exclude node_modules from babel-loader so dependencies (e.g. animejs) aren't broken by ES5 class transform
+if (config.module && config.module.rules) {
+  config.module.rules.forEach((rule) => {
+    rule.exclude = /node_modules/;
+  });
+}
+
 module.exports = config;

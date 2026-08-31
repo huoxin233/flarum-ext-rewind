@@ -126,16 +126,16 @@ export default class CommunitySlideshow extends Page {
         }
 
         const userIds: number[] = [];
-        this.data.top_contributors?.users?.forEach((u: any) => userIds.push(u.user_id));
-        this.data.most_loved?.users?.forEach((u: any) => userIds.push(u.user_id));
-        if (this.data.star_post?.user_id) userIds.push(this.data.star_post.user_id);
-        if (this.data.top_discussion?.author_id) userIds.push(this.data.top_discussion.author_id);
-        if (this.data.most_active_user?.id) userIds.push(this.data.most_active_user.id);
-        this.data.new_members_list?.recent?.forEach((u: any) => userIds.push(u.user_id));
-        this.data.best_answers_leaderboard?.users?.forEach((u: any) => userIds.push(u.user_id));
-        this.data.badge_leaderboard?.users?.forEach((u: any) => userIds.push(u.user_id));
+        this.data.top_contributors?.users?.forEach((u: any) => typeof u.user_id === 'number' && userIds.push(u.user_id));
+        this.data.most_loved?.users?.forEach((u: any) => typeof u.user_id === 'number' && userIds.push(u.user_id));
+        if (typeof this.data.star_post?.user_id === 'number') userIds.push(this.data.star_post.user_id);
+        if (typeof this.data.top_discussion?.author_id === 'number') userIds.push(this.data.top_discussion.author_id);
+        if (typeof this.data.most_active_user?.id === 'number') userIds.push(this.data.most_active_user.id);
+        this.data.new_members_list?.recent?.forEach((u: any) => typeof u.user_id === 'number' && userIds.push(u.user_id));
+        this.data.best_answers_leaderboard?.users?.forEach((u: any) => typeof u.user_id === 'number' && userIds.push(u.user_id));
+        this.data.badge_leaderboard?.users?.forEach((u: any) => typeof u.user_id === 'number' && userIds.push(u.user_id));
 
-        const unique = [...new Set(userIds)].filter((id) => id && !app.store.getById('users', String(id)));
+        const unique = userIds.filter((id, index, self) => id > 0 && self.indexOf(id) === index && !app.store.getById('users', String(id)));
 
         if (unique.length > 0) {
           Promise.all(unique.map((uid) => app.store.find('users', String(uid)).catch(() => null))).then(() => {

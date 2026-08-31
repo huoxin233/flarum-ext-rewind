@@ -46,7 +46,7 @@ export default class ForumRewindPage extends Page {
         .map((s: any) => s.year())
         .sort((a: number, b: number) => b - a);
 
-      this.availableYears = [...new Set(years)] as number[];
+      this.availableYears = years.filter((y, idx, self) => self.indexOf(y) === idx) as number[];
 
       if (!this.availableYears.includes(this.selectedYear)) {
         this.availableYears.unshift(this.selectedYear);
@@ -177,27 +177,25 @@ export default class ForumRewindPage extends Page {
   }
 
   renderHero(enabled: boolean, canModerate: boolean): Mithril.Children {
-    return (
-      <>
-        {!enabled && canModerate && (
-          <div className="RewindPage-adminNotice">
-            <div className="container">
-              <i className="fas fa-eye-slash"></i> {app.translator.trans('huseyinfiliz-rewind.forum.page.admin_notice')}
-            </div>
-          </div>
-        )}
-        <header className="Hero RewindHero">
+    return [
+      !enabled && canModerate ? (
+        <div className="RewindPage-adminNotice">
           <div className="container">
-            <div className="containerNarrow">
-              <h1 className="Hero-title">
-                <i className="fas fa-history"></i> {app.translator.trans('huseyinfiliz-rewind.forum.page.hero_title', { year: this.selectedYear })}
-              </h1>
-              <div className="Hero-subtitle">{app.translator.trans('huseyinfiliz-rewind.forum.page.hero_subtitle')}</div>
-            </div>
+            <i className="fas fa-eye-slash"></i> {app.translator.trans('huseyinfiliz-rewind.forum.page.admin_notice')}
           </div>
-        </header>
-      </>
-    );
+        </div>
+      ) : null,
+      <header className="Hero RewindHero">
+        <div className="container">
+          <div className="containerNarrow">
+            <h1 className="Hero-title">
+              <i className="fas fa-history"></i> {app.translator.trans('huseyinfiliz-rewind.forum.page.hero_title', { year: this.selectedYear })}
+            </h1>
+            <div className="Hero-subtitle">{app.translator.trans('huseyinfiliz-rewind.forum.page.hero_subtitle')}</div>
+          </div>
+        </div>
+      </header>,
+    ];
   }
 
   renderToolbar(year: number, user: any): Mithril.Children {
