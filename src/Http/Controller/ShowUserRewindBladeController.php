@@ -87,7 +87,7 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
         $actor = RequestUtil::getActor($request);
 
         $enabled = (bool) $this->settings->get('huseyinfiliz-rewind.enabled', false);
-        $canModerate = $actor->hasPermission('huseyinfiliz-rewind.moderate');
+        $canModerate = $actor->can('huseyinfiliz-rewind.moderate');
 
         if (! $enabled && ! $canModerate) {
             return $this->renderError(
@@ -100,7 +100,7 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
             );
         }
 
-        if (! $actor->hasPermission('huseyinfiliz-rewind.viewForum') && ! $canModerate) {
+        if (! $actor->can('huseyinfiliz-rewind.viewForum') && ! $canModerate) {
             return $this->renderError(
                 'Access Denied',
                 'You do not have permission to view Rewind recaps.',
@@ -167,6 +167,7 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
         $metrics = is_array($snapshot->data) ? $snapshot->data : [];
         $hiddenSlides = json_decode((string) $this->settings->get('huseyinfiliz-rewind.hidden_user_slides', '[]'), true) ?: [];
         $viewName = $this->resolver->resolveUserView($year);
+        $forumCssUrl = $this->getForumCssUrl($baseUrl);
 
         $html = $this->resolver->render($viewName, [
             'snapshot' => $snapshot,
@@ -176,6 +177,7 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
             'year' => $year,
             'forumTitle' => $forumTitle,
             'baseUrl' => $baseUrl,
+            'forumCssUrl' => $forumCssUrl,
             'isCommunity' => false,
             'isOwner' => $isOwner,
             'canModerate' => $canModerate,
@@ -184,6 +186,21 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
         ]);
 
         return new HtmlResponse($html, 200);
+    }
+
+    protected function getForumCssUrl(string $baseUrl): ?string
+    {
+        try {
+            if ($this->container->has('flarum.assets.forum')) {
+                $url = $this->container->make('flarum.assets.forum')->makeCss()->getUrl();
+                if (! empty($url)) {
+                    return $url;
+                }
+            }
+        } catch (\Throwable) {
+        }
+
+        return $baseUrl !== '' ? "{$baseUrl}/assets/forum.css" : '/assets/forum.css';
     }
 
     protected function renderError(
@@ -203,6 +220,7 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
             'statusCode' => $statusCode,
             'forumTitle' => $forumTitle,
             'baseUrl' => $baseUrl,
+            'forumCssUrl' => $this->getForumCssUrl($baseUrl),
             'actor' => $actor,
             'user' => $user,
             'year' => $year,

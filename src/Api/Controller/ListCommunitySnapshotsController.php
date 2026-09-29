@@ -35,10 +35,10 @@ class ListCommunitySnapshotsController extends AbstractListController
     protected function data(ServerRequestInterface $request, Document $document)
     {
         $actor = RequestUtil::getActor($request);
-        $canModerate = $actor->hasPermission('huseyinfiliz-rewind.moderate');
+        $canModerate = $actor->can('huseyinfiliz-rewind.moderate');
         $enabled = (bool) $this->settings->get('huseyinfiliz-rewind.enabled', false);
 
-        if (! $canModerate && (! $enabled || ! $actor->hasPermission('huseyinfiliz-rewind.viewForum'))) {
+        if (! $canModerate && (! $enabled || ! $actor->can('huseyinfiliz-rewind.viewForum'))) {
             return [];
         }
 

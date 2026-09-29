@@ -34,7 +34,7 @@ class RewindSnapshotSerializer extends AbstractSerializer
 
         $actor = $this->getActor();
         $isOwner = (int) $snapshot->user_id === (int) $actor->id;
-        $canModerate = $actor->hasPermission('huseyinfiliz-rewind.moderate');
+        $canModerate = $actor->can('huseyinfiliz-rewind.moderate');
 
         $data = null;
         if ($isOwner || $canModerate || $snapshot->is_public) {

@@ -37,10 +37,10 @@ class ShowRewindSnapshotController extends AbstractShowController
         $id = Arr::get($request->getQueryParams(), 'id');
         $actor = RequestUtil::getActor($request);
 
-        $canModerate = $actor->hasPermission('huseyinfiliz-rewind.moderate');
+        $canModerate = $actor->can('huseyinfiliz-rewind.moderate');
         $enabled = (bool) $this->settings->get('huseyinfiliz-rewind.enabled', false);
 
-        if (! $canModerate && (! $enabled || ! $actor->hasPermission('huseyinfiliz-rewind.viewForum'))) {
+        if (! $canModerate && (! $enabled || ! $actor->can('huseyinfiliz-rewind.viewForum'))) {
             throw new PermissionDeniedException();
         }
 

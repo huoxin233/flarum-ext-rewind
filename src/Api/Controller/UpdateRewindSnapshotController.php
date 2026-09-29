@@ -32,7 +32,7 @@ class UpdateRewindSnapshotController extends AbstractShowController
         $snapshot = RewindSnapshot::findOrFail($id);
 
         $isOwner = (int) $snapshot->user_id === (int) $actor->id;
-        $canModerate = $actor->hasPermission('huseyinfiliz-rewind.moderate');
+        $canModerate = $actor->can('huseyinfiliz-rewind.moderate');
 
         if (! $isOwner && ! $canModerate) {
             throw new PermissionDeniedException();

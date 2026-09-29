@@ -41,10 +41,8 @@ class MissingUsersController implements RequestHandlerInterface
         $year = (int) ($body['year'] ?? $this->settings->get('huseyinfiliz-rewind.active_year', date('Y')));
         $groupId = isset($body['group']) ? (int) $body['group'] : null;
 
-        $existingUserIds = RewindSnapshot::where('year', $year)->pluck('user_id');
-
         $query = User::where('is_email_confirmed', true)
-            ->whereNotIn('id', $existingUserIds)
+            ->whereNotIn('id', RewindSnapshot::where('year', $year)->select('user_id'))
             ->orderBy('id');
 
         if ($groupId) {

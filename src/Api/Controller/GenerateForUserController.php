@@ -17,6 +17,7 @@ use Flarum\Http\RequestUtil;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use HuseyinFiliz\Rewind\Metric\MetricRegistry;
+use HuseyinFiliz\Rewind\Model\CommunitySnapshot;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -52,6 +53,24 @@ class GenerateForUserController implements RequestHandlerInterface
 
         $targetUser = User::findOrFail($userId);
         $data = $this->metricRegistry->compute($targetUser, $year);
+
+        // Inject community averages if enabled
+        if ($this->settings->get('huseyinfiliz-rewind.community_comparison_enabled')) {
+            $communitySnapshot = CommunitySnapshot::where('year', $year)->first();
+            if ($communitySnapshot && $communitySnapshot->data) {
+                $cd = $communitySnapshot->data;
+                $memberCount = max(1, $cd['new_users']['count'] ?? 1);
+                $totalPosts = $cd['total_posts']['count'] ?? 0;
+                $totalDiscussions = $cd['total_discussions']['count'] ?? 0;
+                $totalWords = $cd['total_words']['total_words'] ?? 0;
+
+                $data['_community_avg'] = [
+                    'posts' => $memberCount > 0 ? round($totalPosts / $memberCount, 1) : 0,
+                    'discussions' => $memberCount > 0 ? round($totalDiscussions / $memberCount, 1) : 0,
+                    'words' => $memberCount > 0 ? round($totalWords / $memberCount) : 0,
+                ];
+            }
+        }
 
         $snapshot = RewindSnapshot::updateOrCreate(
             ['user_id' => $targetUser->id, 'year' => $year],

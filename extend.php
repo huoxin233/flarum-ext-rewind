@@ -60,9 +60,9 @@ return [
         ->post('/rw-community/generate-step', 'huseyinfiliz-rewind.community.generate-step', Controller\GenerateCommunityStepController::class),
 
     (new Extend\ApiSerializer(ForumSerializer::class))
-        ->attribute('canViewRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->hasPermission('huseyinfiliz-rewind.viewForum'))
-        ->attribute('canGenerateRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->hasPermission('huseyinfiliz-rewind.generate'))
-        ->attribute('canModerateRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->hasPermission('huseyinfiliz-rewind.moderate')),
+        ->attribute('canViewRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->can('huseyinfiliz-rewind.viewForum'))
+        ->attribute('canGenerateRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->can('huseyinfiliz-rewind.generate'))
+        ->attribute('canModerateRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->can('huseyinfiliz-rewind.moderate')),
 
     (new Extend\Conditional())
         ->whenExtensionEnabled('flarum-likes', fn () => [

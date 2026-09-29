@@ -27,11 +27,7 @@ class DeleteRewindSnapshotController extends AbstractDeleteController
 
         $snapshot = RewindSnapshot::findOrFail($id);
 
-        $canModerate = $actor->hasPermission('huseyinfiliz-rewind.moderate');
-
-        if (! $canModerate) {
-            throw new PermissionDeniedException();
-        }
+        $actor->assertCan('huseyinfiliz-rewind.moderate');
 
         $snapshot->delete();
     }

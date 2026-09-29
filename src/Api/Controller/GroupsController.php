@@ -25,7 +25,8 @@ class GroupsController implements RequestHandlerInterface
         $actor = RequestUtil::getActor($request);
         $actor->assertAdmin();
 
-        $groups = Group::whereNotIn('id', [Group::GUEST_ID])
+        $groups = Group::withCount('users')
+            ->whereNotIn('id', [Group::GUEST_ID])
             ->orderBy('id')
             ->get();
 
@@ -34,8 +35,11 @@ class GroupsController implements RequestHandlerInterface
                 'id' => $g->id,
                 'name_singular' => $g->name_singular,
                 'name_plural' => $g->name_plural,
+                'nameSingular' => $g->name_singular,
+                'namePlural' => $g->name_plural,
                 'color' => $g->color,
                 'icon' => $g->icon,
+                'count' => (int) ($g->users_count ?? 0),
             ])->values()->all(),
         ]);
     }
