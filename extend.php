@@ -42,6 +42,10 @@ return [
     (new Extend\ServiceProvider())
         ->register(RewindServiceProvider::class),
 
+    (new Extend\Console())
+        ->command(Console\GenerateCommunitySnapshotCommand::class)
+        ->command(Console\GenerateUserSnapshotsCommand::class),
+
     (new Extend\Routes('api'))
         ->get('/rewind-templates', 'huseyinfiliz-rewind.templates.index', AdminController\ListTemplatesController::class)
         ->post('/rewind-templates', 'huseyinfiliz-rewind.templates.create', AdminController\CreateTemplateController::class)

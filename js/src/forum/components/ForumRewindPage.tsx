@@ -111,10 +111,27 @@ export default class ForumRewindPage extends Page {
     m.redraw();
 
     try {
-      await app.request({
+      const stepsResponse = await app.request<{ steps: string[] }>({
         method: 'POST',
-        url: app.forum.attribute('apiUrl') + '/rw-community/generate',
+        url: app.forum.attribute('apiUrl') + '/rw-community/generate-steps',
       });
+
+      const steps = stepsResponse?.steps || [];
+      if (steps.length > 0) {
+        for (const step of steps) {
+          await app.request({
+            method: 'POST',
+            url: app.forum.attribute('apiUrl') + '/rw-community/generate-step',
+            body: { step, year: this.selectedYear },
+          });
+        }
+      } else {
+        await app.request({
+          method: 'POST',
+          url: app.forum.attribute('apiUrl') + '/rw-community/generate',
+        });
+      }
+
       await this.loadData();
     } catch (e: any) {
       const msg = e?.responseJSON?.errors?.[0]?.detail || e?.message || 'Failed to generate community rewind';
