@@ -14,6 +14,7 @@ namespace HuseyinFiliz\Rewind;
 use Flarum\Api\Serializer\ForumSerializer;
 use Flarum\Extend;
 use HuseyinFiliz\Rewind\Api\Controller;
+use HuseyinFiliz\Rewind\Http\Controller\Admin as AdminController;
 use HuseyinFiliz\Rewind\Http\Controller\ShowCommunityRewindBladeController;
 use HuseyinFiliz\Rewind\Http\Controller\ShowUserRewindBladeController;
 
@@ -42,6 +43,11 @@ return [
         ->register(RewindServiceProvider::class),
 
     (new Extend\Routes('api'))
+        ->get('/rewind-templates', 'huseyinfiliz-rewind.templates.index', AdminController\ListTemplatesController::class)
+        ->post('/rewind-templates', 'huseyinfiliz-rewind.templates.create', AdminController\CreateTemplateController::class)
+        ->get('/rewind-templates/{id:[a-z0-9_]+}', 'huseyinfiliz-rewind.templates.show', AdminController\ShowTemplateController::class)
+        ->put('/rewind-templates/{id:[a-z0-9_]+}', 'huseyinfiliz-rewind.templates.update', AdminController\UpdateTemplateController::class)
+        ->delete('/rewind-templates/{id:[a-z0-9_]+}', 'huseyinfiliz-rewind.templates.delete', AdminController\DeleteTemplateController::class)
         ->get('/rw-snaps', 'huseyinfiliz-rewind.snaps.index', Controller\ListRewindSnapshotsController::class)
         ->get('/rw-snaps/{id}', 'huseyinfiliz-rewind.snaps.show', Controller\ShowRewindSnapshotController::class)
         ->patch('/rw-snaps/{id}', 'huseyinfiliz-rewind.snaps.update', Controller\UpdateRewindSnapshotController::class)
