@@ -42,6 +42,9 @@ class ContentCleaner
     {
         $text = self::toPlainText($content);
 
+        // Preserve words with intra-word apostrophes (e.g. Pasajı'nda, don't, it's)
+        $text = preg_replace('/(?<=\p{L})[\'’](?=\p{L})/u', '', $text);
+
         // Remove non-letter, non-number, non-space characters
         $text = preg_replace('/[^\p{L}\p{N}\s]/u', ' ', $text);
 
@@ -63,7 +66,7 @@ class ContentCleaner
     /**
      * Create a plain-text excerpt from Flarum content.
      */
-    public static function excerpt(string $content, int $length = 150): string
+    public static function excerpt(string $content, int $length = 150, string $end = '...'): string
     {
         $text = self::toPlainText($content);
 
@@ -75,6 +78,6 @@ class ContentCleaner
             return $text;
         }
 
-        return mb_substr($text, 0, $length).'…';
+        return mb_substr($text, 0, $length).$end;
     }
 }
