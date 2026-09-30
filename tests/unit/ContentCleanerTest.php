@@ -75,7 +75,7 @@ class ContentCleanerTest extends TestCase
     #[Test]
     public function test_excerpt_truncates_long_content(): void
     {
-        $content = '<p>' . str_repeat('Long content to test excerpt. ', 10) . '</p>';
+        $content = '<p>'.str_repeat('Long content to test excerpt. ', 10).'</p>';
         $excerpt = ContentCleaner::excerpt($content, 50);
 
         $this->assertLessThanOrEqual(53, mb_strlen($excerpt)); // 50 + '...'
