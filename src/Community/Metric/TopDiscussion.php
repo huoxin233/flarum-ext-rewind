@@ -69,6 +69,7 @@ class TopDiscussion implements CommunityMetric
         $excerpt = null;
         if ($firstPost && $firstPost->content) {
             $excerpt = \HuseyinFiliz\Rewind\ContentCleaner::excerpt($firstPost->content);
+
             try {
                 $contentHtml = $this->formatter ? $this->formatter->render($firstPost->content) : htmlspecialchars($excerpt, ENT_QUOTES, 'UTF-8');
             } catch (\Throwable $e) {
