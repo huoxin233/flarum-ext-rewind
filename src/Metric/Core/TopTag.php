@@ -28,10 +28,16 @@ class TopTag implements RewindMetric
         $prefix = $this->db->getTablePrefix();
 
         $result = $this->db->table('posts')
+            ->join('discussions', 'posts.discussion_id', '=', 'discussions.id')
             ->join('discussion_tag', 'posts.discussion_id', '=', 'discussion_tag.discussion_id')
             ->join('tags', 'discussion_tag.tag_id', '=', 'tags.id')
             ->where('posts.user_id', $user->id)
             ->where('posts.type', 'comment')
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
+            ->whereNull('discussions.hidden_at')
+            ->where('discussions.is_private', false)
+            ->where('tags.is_restricted', false)
             ->whereYear('posts.created_at', $year)
             ->select('tags.id', 'tags.name', 'tags.slug', 'tags.color', 'tags.icon')
             ->selectRaw('COUNT(*) as post_count')

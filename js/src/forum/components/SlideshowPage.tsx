@@ -750,12 +750,14 @@ export default class SlideshowPage extends Page {
 
   renderQuoteContent(data: Record<string, any>): Mithril.Children {
     const title = data.discussion_title || '—';
-    const contentHtml = data.content_html || data.excerpt || '';
+    const contentHtml = data.content_html || '';
+    const excerpt = data.excerpt || '';
+    const bodyContent = contentHtml ? m.trust(contentHtml) : excerpt;
     const user = this.snapshot?.user();
 
     return (
       <div className="rw-quote-wrap">
-        {contentHtml ? (
+        {contentHtml || excerpt ? (
           <div className="rw-post-preview">
             <div className="rw-post-preview-header">
               <div className="rw-post-preview-left">
@@ -764,7 +766,7 @@ export default class SlideshowPage extends Page {
               </div>
               <span className="rw-post-preview-disc">{title}</span>
             </div>
-            <div className="rw-post-preview-body">{m.trust(contentHtml)}</div>
+            <div className="rw-post-preview-body">{bodyContent}</div>
             <div className="rw-quote-meta">
               {data.metric_type === 'likes' ? (
                 <>

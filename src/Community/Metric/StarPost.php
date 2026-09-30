@@ -33,6 +33,10 @@ class StarPost implements CommunityMetric
             ->join('discussions', 'posts.discussion_id', '=', 'discussions.id')
             ->join('users', 'posts.user_id', '=', 'users.id')
             ->where('posts.type', 'comment')
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
+            ->whereNull('discussions.hidden_at')
+            ->where('discussions.is_private', false)
             ->whereYear('posts.created_at', $year)
             ->select('posts.id', 'posts.user_id', 'posts.content', 'posts.discussion_id', 'discussions.title as discussion_title', 'users.username')
             ->selectRaw('COUNT('.$prefix.'post_likes.user_id) as like_count')
@@ -45,9 +49,9 @@ class StarPost implements CommunityMetric
         }
 
         try {
-            $contentHtml = $this->formatter ? $this->formatter->render($result->content ?? '') : \HuseyinFiliz\Rewind\ContentCleaner::excerpt($result->content ?? '');
+            $contentHtml = $this->formatter ? $this->formatter->render($result->content ?? '') : htmlspecialchars(\HuseyinFiliz\Rewind\ContentCleaner::excerpt($result->content ?? ''), ENT_QUOTES, 'UTF-8');
         } catch (\Throwable $e) {
-            $contentHtml = \HuseyinFiliz\Rewind\ContentCleaner::excerpt($result->content ?? '');
+            $contentHtml = htmlspecialchars(\HuseyinFiliz\Rewind\ContentCleaner::excerpt($result->content ?? ''), ENT_QUOTES, 'UTF-8');
         }
 
         return [
@@ -57,6 +61,7 @@ class StarPost implements CommunityMetric
             'discussion_id' => (int) $result->discussion_id,
             'discussion_title' => $result->discussion_title,
             'like_count' => (int) $result->like_count,
+            'excerpt' => \HuseyinFiliz\Rewind\ContentCleaner::excerpt($result->content ?? ''),
             'content_html' => $contentHtml,
         ];
     }
@@ -70,6 +75,7 @@ class StarPost implements CommunityMetric
             'discussion_id' => null,
             'discussion_title' => null,
             'like_count' => 0,
+            'excerpt' => null,
             'content_html' => null,
         ];
     }

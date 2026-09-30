@@ -56,6 +56,8 @@ class TopWords implements RewindMetric
 
         Post::where('user_id', $user->id)
             ->where('type', 'comment')
+            ->whereNull('hidden_at')
+            ->where('is_private', false)
             ->whereYear('created_at', $year)
             ->select('id', 'content')
             ->chunkById(500, function ($posts) use (&$wordCounts) {

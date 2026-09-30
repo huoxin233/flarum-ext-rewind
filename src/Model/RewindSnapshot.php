@@ -12,7 +12,13 @@ class RewindSnapshot extends AbstractModel
 
     public $timestamps = false;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'user_id',
+        'year',
+        'data',
+        'generated_at',
+        'is_public',
+    ];
 
     protected $casts = [
         'data' => 'array',

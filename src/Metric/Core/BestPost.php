@@ -47,6 +47,10 @@ class BestPost implements RewindMetric
             ->join('discussions', 'posts.discussion_id', '=', 'discussions.id')
             ->where('posts.user_id', $user->id)
             ->where('posts.type', 'comment')
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
+            ->whereNull('discussions.hidden_at')
+            ->where('discussions.is_private', false)
             ->whereYear('posts.created_at', $year)
             ->select('posts.id', 'posts.discussion_id', 'posts.content', 'discussions.title as discussion_title')
             ->selectRaw('COUNT('.$prefix.'post_likes.user_id) as like_count')
@@ -64,6 +68,7 @@ class BestPost implements RewindMetric
             'discussion_title' => $result->discussion_title,
             'metric_type' => 'likes',
             'count' => (int) $result->like_count,
+            'excerpt' => \HuseyinFiliz\Rewind\ContentCleaner::excerpt($result->content ?? ''),
             'content_html' => $this->renderContent($result->content ?? ''),
         ];
     }
@@ -74,6 +79,10 @@ class BestPost implements RewindMetric
             ->join('discussions', 'posts.discussion_id', '=', 'discussions.id')
             ->where('posts.user_id', $user->id)
             ->where('posts.type', 'comment')
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
+            ->whereNull('discussions.hidden_at')
+            ->where('discussions.is_private', false)
             ->whereYear('posts.created_at', $year)
             ->select('posts.id', 'posts.discussion_id', 'posts.content', 'discussions.title as discussion_title', 'discussions.comment_count')
             ->orderByDesc('discussions.comment_count')
@@ -86,6 +95,7 @@ class BestPost implements RewindMetric
                 'discussion_title' => null,
                 'metric_type' => null,
                 'count' => 0,
+                'excerpt' => null,
                 'content_html' => null,
             ];
         }
@@ -96,6 +106,7 @@ class BestPost implements RewindMetric
             'discussion_title' => $result->discussion_title,
             'metric_type' => 'discussion_comments',
             'count' => (int) $result->comment_count,
+            'excerpt' => \HuseyinFiliz\Rewind\ContentCleaner::excerpt($result->content ?? ''),
             'content_html' => $this->renderContent($result->content ?? ''),
         ];
     }
@@ -107,9 +118,9 @@ class BestPost implements RewindMetric
                 return $this->formatter->render($content);
             }
 
-            return \HuseyinFiliz\Rewind\ContentCleaner::excerpt($content);
+            return htmlspecialchars(\HuseyinFiliz\Rewind\ContentCleaner::excerpt($content), ENT_QUOTES, 'UTF-8');
         } catch (\Throwable $e) {
-            return \HuseyinFiliz\Rewind\ContentCleaner::excerpt($content);
+            return htmlspecialchars(\HuseyinFiliz\Rewind\ContentCleaner::excerpt($content), ENT_QUOTES, 'UTF-8');
         }
     }
 }

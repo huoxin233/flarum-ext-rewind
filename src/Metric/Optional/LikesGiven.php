@@ -26,8 +26,11 @@ class LikesGiven implements RewindMetric
     public function calculate(User $user, int $year): array
     {
         $count = $this->db->table('post_likes')
-            ->where('user_id', $user->id)
-            ->whereYear('created_at', $year)
+            ->join('posts', 'posts.id', '=', 'post_likes.post_id')
+            ->where('post_likes.user_id', $user->id)
+            ->whereYear('post_likes.created_at', $year)
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
             ->count();
 
         return ['count' => $count];

@@ -10,7 +10,11 @@ class CommunitySnapshot extends AbstractModel
 
     public $timestamps = false;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'year',
+        'data',
+        'generated_at',
+    ];
 
     protected $casts = [
         'data' => 'array',

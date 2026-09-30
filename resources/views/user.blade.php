@@ -194,7 +194,11 @@
         </div>
 
         <div class="rw-quote-box">
-            {!! $metrics['best_post']['content_html'] !!}
+            @if(!empty($metrics['best_post']['content_html']))
+                {!! $metrics['best_post']['content_html'] !!}
+            @elseif(!empty($metrics['best_post']['excerpt']))
+                {{ $metrics['best_post']['excerpt'] }}
+            @endif
         </div>
 
         @if(!empty($metrics['best_post']['discussion_title']))

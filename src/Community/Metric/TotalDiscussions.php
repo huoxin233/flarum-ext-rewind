@@ -19,7 +19,10 @@ class TotalDiscussions implements CommunityMetric
 
     public function calculate(int $year): array
     {
-        $count = Discussion::whereYear('created_at', $year)->count();
+        $count = Discussion::whereNull('hidden_at')
+            ->where('is_private', false)
+            ->whereYear('created_at', $year)
+            ->count();
 
         return ['count' => $count];
     }

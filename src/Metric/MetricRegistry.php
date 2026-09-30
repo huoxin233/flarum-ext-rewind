@@ -67,6 +67,7 @@ class MetricRegistry
                 'discussion_title' => null,
                 'metric_type' => null,
                 'count' => 0,
+                'excerpt' => null,
                 'content_html' => null,
             ],
             'most_active_month' => [

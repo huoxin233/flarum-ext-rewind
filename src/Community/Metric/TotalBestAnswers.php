@@ -27,6 +27,8 @@ class TotalBestAnswers implements CommunityMetric
         $count = $this->db->table('discussions')
             ->whereNotNull('best_answer_post_id')
             ->whereYear('best_answer_set_at', $year)
+            ->whereNull('hidden_at')
+            ->where('is_private', false)
             ->count();
 
         return ['count' => $count];

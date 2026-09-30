@@ -28,6 +28,8 @@ class MostLoved implements CommunityMetric
             ->join('posts', 'posts.id', '=', 'post_likes.post_id')
             ->join('users', 'users.id', '=', 'posts.user_id')
             ->where('posts.type', 'comment')
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
             ->whereYear('post_likes.created_at', $year)
             ->select('posts.user_id', 'users.username')
             ->selectRaw('COUNT(*) as like_count')

@@ -25,7 +25,10 @@ class TotalReactions implements CommunityMetric
     public function calculate(int $year): array
     {
         $count = $this->db->table('post_reactions')
-            ->whereYear('created_at', $year)
+            ->join('posts', 'posts.id', '=', 'post_reactions.post_id')
+            ->whereYear('post_reactions.created_at', $year)
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
             ->count();
 
         return ['count' => $count];

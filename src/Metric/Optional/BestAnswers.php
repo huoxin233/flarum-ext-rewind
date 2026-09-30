@@ -28,6 +28,10 @@ class BestAnswers implements RewindMetric
         $count = $this->db->table('discussions')
             ->join('posts', 'posts.id', '=', 'discussions.best_answer_post_id')
             ->where('posts.user_id', $user->id)
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
+            ->whereNull('discussions.hidden_at')
+            ->where('discussions.is_private', false)
             ->whereYear('discussions.best_answer_set_at', $year)
             ->count();
 

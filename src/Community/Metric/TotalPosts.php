@@ -20,6 +20,8 @@ class TotalPosts implements CommunityMetric
     public function calculate(int $year): array
     {
         $count = Post::where('type', 'comment')
+            ->whereNull('hidden_at')
+            ->where('is_private', false)
             ->whereYear('created_at', $year)
             ->count();
 

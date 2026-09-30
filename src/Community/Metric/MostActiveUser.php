@@ -24,14 +24,14 @@ class MostActiveUser implements CommunityMetric
 
     public function calculate(int $year): array
     {
-        $prefix = $this->db->getTablePrefix();
-
         $result = $this->db->table('posts')
             ->join('users', 'users.id', '=', 'posts.user_id')
             ->where('posts.type', 'comment')
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
             ->whereYear('posts.created_at', $year)
             ->select('users.id', 'users.username')
-            ->selectRaw('COUNT('.$prefix.'posts.id) as post_count')
+            ->selectRaw('COUNT(*) as post_count')
             ->groupBy('users.id', 'users.username')
             ->orderByDesc('post_count')
             ->first();

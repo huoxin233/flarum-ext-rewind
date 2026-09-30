@@ -216,7 +216,14 @@ class RewindSnapshotResource extends AbstractDatabaseResource
                     return $context->getActor()->can('huseyinfiliz-rewind.moderate');
                 }),
             Schema\Boolean::make('isEmpty')
-                ->get(function (RewindSnapshot $snapshot) {
+                ->get(function (RewindSnapshot $snapshot, Context $context) {
+                    if (! $snapshot->is_public) {
+                        $actor = $context->getActor();
+                        if ($actor->id !== $snapshot->user_id && ! $actor->can('huseyinfiliz-rewind.moderate')) {
+                            return false;
+                        }
+                    }
+
                     $data = $snapshot->data;
                     if (! is_array($data)) {
                         return true;

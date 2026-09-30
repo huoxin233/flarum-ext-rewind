@@ -31,6 +31,9 @@ class BestFriend implements RewindMetric
             ->join('posts', 'posts.id', '=', 'post_likes.post_id')
             ->join('users', 'users.id', '=', 'post_likes.user_id')
             ->where('posts.user_id', $user->id)
+            ->where('posts.type', 'comment')
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
             ->where('post_likes.user_id', '!=', $user->id)
             ->whereYear('post_likes.created_at', $year)
             ->select('post_likes.user_id', 'users.username')
@@ -50,6 +53,9 @@ class BestFriend implements RewindMetric
             ->join('posts', 'posts.id', '=', 'post_likes.post_id')
             ->where('post_likes.user_id', $user->id)
             ->where('posts.user_id', $friendId)
+            ->where('posts.type', 'comment')
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
             ->whereYear('post_likes.created_at', $year)
             ->count();
 
@@ -60,6 +66,9 @@ class BestFriend implements RewindMetric
             $mentionsTo = (int) $this->db->table('post_mentions_user')
                 ->join('posts', 'posts.id', '=', 'post_mentions_user.post_id')
                 ->where('posts.user_id', $user->id)
+                ->where('posts.type', 'comment')
+                ->whereNull('posts.hidden_at')
+                ->where('posts.is_private', false)
                 ->where('post_mentions_user.mentions_user_id', $friendId)
                 ->whereYear('post_mentions_user.created_at', $year)
                 ->count();
@@ -67,6 +76,9 @@ class BestFriend implements RewindMetric
             $mentionsFrom = (int) $this->db->table('post_mentions_user')
                 ->join('posts', 'posts.id', '=', 'post_mentions_user.post_id')
                 ->where('posts.user_id', $friendId)
+                ->where('posts.type', 'comment')
+                ->whereNull('posts.hidden_at')
+                ->where('posts.is_private', false)
                 ->where('post_mentions_user.mentions_user_id', $user->id)
                 ->whereYear('post_mentions_user.created_at', $year)
                 ->count();

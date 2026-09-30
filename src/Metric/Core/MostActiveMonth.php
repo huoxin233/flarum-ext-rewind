@@ -24,6 +24,8 @@ class MostActiveMonth implements RewindMetric
     {
         $dates = Post::where('user_id', $user->id)
             ->where('type', 'comment')
+            ->whereNull('hidden_at')
+            ->where('is_private', false)
             ->whereYear('created_at', $year)
             ->pluck('created_at');
 

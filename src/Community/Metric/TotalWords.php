@@ -23,6 +23,8 @@ class TotalWords implements CommunityMetric
         $totalPosts = 0;
 
         Post::where('type', 'comment')
+            ->whereNull('hidden_at')
+            ->where('is_private', false)
             ->whereYear('created_at', $year)
             ->select('id', 'content')
             ->chunkById(1000, function ($posts) use (&$totalWords, &$totalPosts) {

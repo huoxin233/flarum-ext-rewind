@@ -29,6 +29,8 @@ class LikesReceived implements RewindMetric
             ->join('posts', 'posts.id', '=', 'post_likes.post_id')
             ->where('posts.user_id', $user->id)
             ->whereYear('post_likes.created_at', $year)
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
             ->count();
 
         return ['count' => $count];

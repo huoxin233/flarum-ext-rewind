@@ -31,6 +31,10 @@ class TopDiscussion implements CommunityMetric
         $result = $this->db->table('posts')
             ->join('discussions', 'discussions.id', '=', 'posts.discussion_id')
             ->where('posts.type', 'comment')
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
+            ->whereNull('discussions.hidden_at')
+            ->where('discussions.is_private', false)
             ->whereYear('posts.created_at', $year)
             ->select('discussions.id', 'discussions.title', 'discussions.slug')
             ->selectRaw('COUNT('.$prefix.'posts.id) as post_count')
@@ -44,9 +48,10 @@ class TopDiscussion implements CommunityMetric
                 'title' => null,
                 'slug' => null,
                 'post_count' => 0,
+                'excerpt' => null,
                 'content_html' => null,
                 'author_username' => null,
-                'author_id' => null
+                'author_id' => null,
             ];
         }
 
@@ -54,16 +59,20 @@ class TopDiscussion implements CommunityMetric
             ->join('users', 'users.id', '=', 'posts.user_id')
             ->where('posts.discussion_id', $result->id)
             ->where('posts.type', 'comment')
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
             ->orderBy('posts.number')
             ->select('posts.content', 'users.username', 'users.id as user_id')
             ->first();
 
         $contentHtml = null;
+        $excerpt = null;
         if ($firstPost && $firstPost->content) {
+            $excerpt = \HuseyinFiliz\Rewind\ContentCleaner::excerpt($firstPost->content);
             try {
-                $contentHtml = $this->formatter ? $this->formatter->render($firstPost->content) : \HuseyinFiliz\Rewind\ContentCleaner::excerpt($firstPost->content);
+                $contentHtml = $this->formatter ? $this->formatter->render($firstPost->content) : htmlspecialchars($excerpt, ENT_QUOTES, 'UTF-8');
             } catch (\Throwable $e) {
-                $contentHtml = \HuseyinFiliz\Rewind\ContentCleaner::excerpt($firstPost->content);
+                $contentHtml = htmlspecialchars($excerpt, ENT_QUOTES, 'UTF-8');
             }
         }
 
@@ -72,6 +81,7 @@ class TopDiscussion implements CommunityMetric
             'title' => $result->title,
             'slug' => $result->slug,
             'post_count' => (int) $result->post_count,
+            'excerpt' => $excerpt,
             'content_html' => $contentHtml,
             'author_username' => $firstPost?->username,
             'author_id' => $firstPost ? (int) $firstPost->user_id : null,

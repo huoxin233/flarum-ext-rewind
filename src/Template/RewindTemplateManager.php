@@ -289,6 +289,10 @@ class RewindTemplateManager
             throw new TemplateNotFoundException("Template '{$id}' is not a valid template identifier.");
         }
 
+        if (preg_match('/<\?(?:php|=)/i', $content)) {
+            throw new InvalidTemplateException('Raw PHP tags are not permitted in template files.');
+        }
+
         $destPath = $parsed['customPath'];
         if (! file_exists($destPath)) {
             throw new TemplateNotFoundException("Custom template '{$id}' does not exist. Create it first before editing.");
