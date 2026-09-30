@@ -313,23 +313,7 @@ class RewindSnapshotResource extends AbstractDatabaseResource
         try {
             $data = $this->metricRegistry->compute($actor, $year);
 
-            // Inject community averages if enabled
-            if ($this->settings->get('huseyinfiliz-rewind.community_comparison_enabled')) {
-                $communitySnapshot = \HuseyinFiliz\Rewind\Model\CommunitySnapshot::where('year', $year)->first();
-                if ($communitySnapshot && $communitySnapshot->data) {
-                    $cd = $communitySnapshot->data;
-                    $memberCount = max(1, $cd['new_users']['count'] ?? 1);
-                    $totalPosts = $cd['total_posts']['count'] ?? 0;
-                    $totalDiscussions = $cd['total_discussions']['count'] ?? 0;
-                    $totalWords = $cd['total_words']['total_words'] ?? 0;
-
-                    $data['_community_avg'] = [
-                        'posts' => $memberCount > 0 ? round($totalPosts / $memberCount, 1) : 0,
-                        'discussions' => $memberCount > 0 ? round($totalDiscussions / $memberCount, 1) : 0,
-                        'words' => $memberCount > 0 ? round($totalWords / $memberCount) : 0,
-                    ];
-                }
-            }
+            $this->injectCommunityAverages($data, $year);
 
             $snapshot = RewindSnapshot::updateOrCreate(
                 ['user_id' => $actor->id, 'year' => $year],
@@ -370,9 +354,37 @@ class RewindSnapshotResource extends AbstractDatabaseResource
             ]);
         }
 
-        $data = $this->metricRegistry->compute($user, $year);
+        $existing = RewindSnapshot::where('user_id', $userId)
+            ->where('year', $year)
+            ->first();
 
-        // Inject community averages if enabled
+        $lockKey = "rewind_generating_{$userId}";
+        if ($this->cache && ! $this->cache->add($lockKey, true, 30)) {
+            throw new \Flarum\Foundation\ValidationException([
+                'rate_limit' => 'A Rewind is currently being generated for this user. Please wait.',
+            ]);
+        }
+
+        try {
+            $data = $this->metricRegistry->compute($user, $year);
+
+            $this->injectCommunityAverages($data, $year);
+
+            return RewindSnapshot::updateOrCreate(
+                ['user_id' => $userId, 'year' => $year],
+                [
+                    'data' => $data,
+                    'generated_at' => Carbon::now(),
+                    'is_public' => $existing ? $existing->is_public : true,
+                ]
+            );
+        } finally {
+            $this->cache?->forget($lockKey);
+        }
+    }
+
+    protected function injectCommunityAverages(array &$data, int $year): void
+    {
         if ($this->settings->get('huseyinfiliz-rewind.community_comparison_enabled')) {
             $communitySnapshot = \HuseyinFiliz\Rewind\Model\CommunitySnapshot::where('year', $year)->first();
             if ($communitySnapshot && $communitySnapshot->data) {
@@ -389,11 +401,6 @@ class RewindSnapshotResource extends AbstractDatabaseResource
                 ];
             }
         }
-
-        return RewindSnapshot::updateOrCreate(
-            ['user_id' => $userId, 'year' => $year],
-            ['data' => $data, 'generated_at' => Carbon::now(), 'is_public' => true]
-        );
     }
 
     protected function batchDelete(Context $context): int

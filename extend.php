@@ -90,7 +90,7 @@ return [
             (new Extend\ServiceProvider())
                 ->register(Metric\Optional\BadgesMetricsProvider::class),
         ])
-        ->whenExtensionEnabled('flarum-best-answer', fn () => [
+        ->whenExtensionEnabled('fof-best-answer', fn () => [
             (new Extend\ServiceProvider())
                 ->register(Metric\Optional\BestAnswersMetricsProvider::class),
         ]),

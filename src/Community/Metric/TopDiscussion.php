@@ -2,6 +2,7 @@
 
 namespace HuseyinFiliz\Rewind\Community\Metric;
 
+use Flarum\Formatter\Formatter;
 use HuseyinFiliz\Rewind\Community\CommunityMetric;
 use Illuminate\Database\ConnectionInterface;
 
@@ -9,6 +10,7 @@ class TopDiscussion implements CommunityMetric
 {
     public function __construct(
         protected ConnectionInterface $db,
+        protected ?Formatter $formatter = null,
     ) {
     }
 
@@ -59,8 +61,7 @@ class TopDiscussion implements CommunityMetric
         $contentHtml = null;
         if ($firstPost && $firstPost->content) {
             try {
-                $formatter = resolve(\Flarum\Formatter\Formatter::class);
-                $contentHtml = $formatter->render($firstPost->content);
+                $contentHtml = $this->formatter ? $this->formatter->render($firstPost->content) : \HuseyinFiliz\Rewind\ContentCleaner::excerpt($firstPost->content);
             } catch (\Throwable $e) {
                 $contentHtml = \HuseyinFiliz\Rewind\ContentCleaner::excerpt($firstPost->content);
             }

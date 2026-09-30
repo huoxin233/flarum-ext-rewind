@@ -2,36 +2,25 @@
 
 namespace HuseyinFiliz\Rewind;
 
-use Flarum\Formatter\Formatter;
-
 class ContentCleaner
 {
     /**
-     * Convert Flarum TextFormatter XML content to clean plain text
-     * by rendering through s9e then stripping HTML.
+     * Convert Flarum TextFormatter XML or HTML content to clean plain text
+     * by extracting text representations, replacing tags, and stripping markup.
      */
     public static function toPlainText(string $content): string
     {
-        try {
-            /** @var Formatter $formatter */
-            $formatter = resolve(Formatter::class);
+        $html = $content;
 
-            // Render XML to HTML via s9e TextFormatter
-            $html = $formatter->render($content);
-        } catch (\Throwable $e) {
-            // Fallback if formatter fails
-            $html = $content;
-        }
-
-        // Replace images with placeholder before stripping
+        // Replace images with their alt text before stripping
         $html = preg_replace('/<img[^>]*alt="([^"]*)"[^>]*>/i', ' $1 ', $html);
         $html = preg_replace('/<img[^>]*>/i', '', $html);
 
         // Replace <br> and block-level closings with space
         $html = preg_replace('/<br\s*\/?>/i', ' ', $html);
-        $html = preg_replace('/<\/(p|div|li|blockquote|h[1-6])>/i', ' ', $html);
+        $html = preg_replace('/<\/(p|div|li|blockquote|h[1-6]|t|r)>/i', ' ', $html);
 
-        // Strip remaining tags
+        // Strip remaining XML and HTML tags
         $text = strip_tags($html);
 
         // Decode HTML entities

@@ -3,6 +3,7 @@
 namespace HuseyinFiliz\Rewind\Metric\Core;
 
 use Flarum\Extension\ExtensionManager;
+use Flarum\Formatter\Formatter;
 use Flarum\User\User;
 use HuseyinFiliz\Rewind\Metric\RewindMetric;
 use Illuminate\Database\ConnectionInterface;
@@ -12,6 +13,7 @@ class BestPost implements RewindMetric
     public function __construct(
         protected ConnectionInterface $db,
         protected ExtensionManager $extensions,
+        protected ?Formatter $formatter = null,
     ) {
     }
 
@@ -101,9 +103,11 @@ class BestPost implements RewindMetric
     protected function renderContent(string $content): string
     {
         try {
-            $formatter = resolve(\Flarum\Formatter\Formatter::class);
+            if ($this->formatter) {
+                return $this->formatter->render($content);
+            }
 
-            return $formatter->render($content);
+            return \HuseyinFiliz\Rewind\ContentCleaner::excerpt($content);
         } catch (\Throwable $e) {
             return \HuseyinFiliz\Rewind\ContentCleaner::excerpt($content);
         }

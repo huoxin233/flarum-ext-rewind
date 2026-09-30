@@ -2,6 +2,7 @@
 
 namespace HuseyinFiliz\Rewind\Community\Metric;
 
+use Flarum\Formatter\Formatter;
 use HuseyinFiliz\Rewind\Community\CommunityMetric;
 use Illuminate\Database\ConnectionInterface;
 
@@ -9,6 +10,7 @@ class StarPost implements CommunityMetric
 {
     public function __construct(
         protected ConnectionInterface $db,
+        protected ?Formatter $formatter = null,
     ) {
     }
 
@@ -43,8 +45,7 @@ class StarPost implements CommunityMetric
         }
 
         try {
-            $formatter = resolve(\Flarum\Formatter\Formatter::class);
-            $contentHtml = $formatter->render($result->content ?? '');
+            $contentHtml = $this->formatter ? $this->formatter->render($result->content ?? '') : \HuseyinFiliz\Rewind\ContentCleaner::excerpt($result->content ?? '');
         } catch (\Throwable $e) {
             $contentHtml = \HuseyinFiliz\Rewind\ContentCleaner::excerpt($result->content ?? '');
         }

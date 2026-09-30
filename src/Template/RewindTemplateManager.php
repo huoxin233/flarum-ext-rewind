@@ -336,27 +336,12 @@ class RewindTemplateManager
     }
 
     /**
-     * Clears compiled Blade view cache files so changes are immediately visible.
+     * Clears view finder cache so template location changes are immediately detected.
      */
     public function clearCompiledViewCache(): void
     {
         if ($this->viewFactory && method_exists($this->viewFactory, 'flushFinderCache')) {
             $this->viewFactory->flushFinderCache();
-        }
-
-        $compiledViewsDir = rtrim($this->paths->storage, '/\\').'/views';
-
-        if (! is_dir($compiledViewsDir)) {
-            return;
-        }
-
-        $files = glob($compiledViewsDir.'/*.php');
-        if (is_array($files)) {
-            foreach ($files as $file) {
-                if (is_file($file)) {
-                    @unlink($file);
-                }
-            }
         }
     }
 }

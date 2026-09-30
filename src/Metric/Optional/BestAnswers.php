@@ -20,7 +20,7 @@ class BestAnswers implements RewindMetric
 
     public function requiredExtension(): ?string
     {
-        return 'flarum-best-answer';
+        return 'fof-best-answer';
     }
 
     public function calculate(User $user, int $year): array
