@@ -4,6 +4,7 @@ import Button from 'flarum/common/components/Button';
 import Dropdown from 'flarum/common/components/Dropdown';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 import { getYearRenderMode } from '../../common/utils/getYearRenderMode';
+import ensureCommunityRewind from '../utils/ensureCommunityRewind';
 import type Mithril from 'mithril';
 import type User from 'flarum/common/models/User';
 
@@ -11,6 +12,12 @@ export default class ProfileRewindPage extends UserPage {
   loading = true;
   generating = false;
   snapshots: any[] = [];
+  isDestroyed = false;
+
+  onremove(vnode: Mithril.VnodeDOM) {
+    this.isDestroyed = true;
+    super.onremove(vnode);
+  }
 
   oninit(vnode: Mithril.Vnode) {
     super.oninit(vnode);
@@ -60,6 +67,8 @@ export default class ProfileRewindPage extends UserPage {
     m.redraw();
 
     try {
+      await ensureCommunityRewind(app.forum.attribute<number>('rewindActiveYear'), () => this.isDestroyed);
+      if (this.isDestroyed) return;
       await app.request({
         method: 'POST',
         url: app.forum.attribute('apiUrl') + '/rw-snaps/generate',
@@ -240,7 +249,7 @@ export default class ProfileRewindPage extends UserPage {
                         <span className="RewindGrid-cardBadge locked">
                           {empty
                             ? app.translator.trans('huseyinfiliz-rewind.forum.profile.no_activity')
-                            : app.translator.trans('huseyinfiliz-rewind.forum.profile.private_badge')}
+                            : app.translator.trans('huseyinfiliz-rewind.forum.profile.not_yet_available')}
                         </span>
                       </div>
                     </div>

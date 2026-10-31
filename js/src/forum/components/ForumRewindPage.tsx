@@ -6,6 +6,7 @@ import Link from 'flarum/common/components/Link';
 import LoadingIndicator from 'flarum/common/components/LoadingIndicator';
 import listItems from 'flarum/common/helpers/listItems';
 import { getYearRenderMode } from '../../common/utils/getYearRenderMode';
+import ensureCommunityRewind from '../utils/ensureCommunityRewind';
 import type Mithril from 'mithril';
 
 export default class ForumRewindPage extends Page {
@@ -16,6 +17,13 @@ export default class ForumRewindPage extends Page {
   userHasSnapshot = false;
   selectedYear = 0;
   availableYears: number[] = [];
+  preparingCommunity = false;
+  isDestroyed = false;
+
+  onremove(vnode: Mithril.VnodeDOM) {
+    this.isDestroyed = true;
+    super.onremove(vnode);
+  }
 
   oninit(vnode: Mithril.Vnode) {
     super.oninit(vnode);
@@ -72,8 +80,18 @@ export default class ForumRewindPage extends Page {
       } as any);
       const results = Array.isArray(response) ? response : [response];
       this.communitySnapshot = results.length > 0 ? results[0] : null;
+      if (!this.communitySnapshot) {
+        this.preparingCommunity = true;
+        m.redraw();
+        if (await ensureCommunityRewind(year, () => this.isDestroyed || this.selectedYear !== year)) {
+          const ready = await app.store.find('rw-community', { filter: { year } } as any);
+          this.communitySnapshot = (Array.isArray(ready) ? ready[0] : ready) || null;
+        }
+      }
     } catch {
       this.communitySnapshot = null;
+    } finally {
+      this.preparingCommunity = false;
     }
 
     const user = app.session.user;
@@ -114,21 +132,27 @@ export default class ForumRewindPage extends Page {
       const stepsResponse = await app.request<{ steps: string[] }>({
         method: 'POST',
         url: app.forum.attribute('apiUrl') + '/rw-community/generate-steps',
+        body: { year: this.selectedYear },
       });
 
       const steps = stepsResponse?.steps || [];
       if (steps.length > 0) {
         for (const step of steps) {
-          await app.request({
-            method: 'POST',
-            url: app.forum.attribute('apiUrl') + '/rw-community/generate-step',
-            body: { step, year: this.selectedYear },
-          });
+          let complete = false;
+          while (!complete && !this.isDestroyed) {
+            const progress = await app.request<{ data: { stepComplete: boolean } }>({
+              method: 'POST',
+              url: app.forum.attribute('apiUrl') + '/rw-community/generate-step',
+              body: { step, year: this.selectedYear },
+            });
+            complete = progress.data.stepComplete;
+          }
         }
       } else {
         await app.request({
           method: 'POST',
           url: app.forum.attribute('apiUrl') + '/rw-community/generate',
+          body: { year: this.selectedYear },
         });
       }
 
@@ -179,6 +203,7 @@ export default class ForumRewindPage extends Page {
                 {this.loading || this.loadingContent ? (
                   <div className="RewindPage-contentLoading">
                     <LoadingIndicator />
+                    {this.preparingCommunity && <p>{app.translator.trans('huseyinfiliz-rewind.forum.community.preparing')}</p>}
                   </div>
                 ) : this.communitySnapshot ? (
                   this.renderCommunityStats()
@@ -229,7 +254,7 @@ export default class ForumRewindPage extends Page {
                 key={y}
                 className={'RewindPage-yearBtn' + (y === this.selectedYear ? ' active' : '')}
                 onclick={() => this.switchYear(y)}
-                disabled={this.loading || this.loadingContent}
+                disabled={this.loading || this.loadingContent || this.generating}
               >
                 {y}
               </button>
