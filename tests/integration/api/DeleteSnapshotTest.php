@@ -86,6 +86,9 @@ class DeleteSnapshotTest extends TestCase
     public function admin_can_batch_delete_by_group()
     {
         $this->prepareDatabase([
+            'groups' => [
+                ['id' => 5, 'name_singular' => 'Test', 'name_plural' => 'Tests'],
+            ],
             'users' => [
                 ['id' => 10, 'username' => 'grouped', 'email' => 'grouped@machine.local', 'password' => 'test-password', 'is_email_confirmed' => 1],
                 ['id' => 11, 'username' => 'other', 'email' => 'other@machine.local', 'password' => 'test-password', 'is_email_confirmed' => 1],

@@ -43,7 +43,7 @@ class DeleteBatchController implements RequestHandlerInterface
 
         $groupId = isset($body['group']) && $body['group'] !== null ? (int) $body['group'] : null;
         if ($groupId) {
-            $userIds = User::whereHas('groups', fn ($q) => $q->where('groups.id', $groupId))->select('id');
+            $userIds = User::whereHas('groups', fn ($q) => $q->where('groups.id', $groupId))->pluck('id')->all();
             $query->whereIn('user_id', $userIds);
         }
 

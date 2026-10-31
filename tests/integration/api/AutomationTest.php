@@ -231,6 +231,12 @@ class AutomationTest extends TestCase
             ['id' => 11, 'discussion_id' => 1, 'number' => 11, 'user_id' => 2, 'type' => 'comment', 'created_at' => '2026-01-01 00:00:00', 'content' => '<t>excluded words</t>'],
             ['id' => 12, 'discussion_id' => 1, 'number' => 12, 'user_id' => 2, 'type' => 'comment', 'created_at' => '2025-12-31 23:59:59.999999', 'content' => '<t>included words</t>'],
         ]);
+
+        $inserted = $this->database()->table('posts')->where('id', 12)->value('created_at');
+        if ((string) $inserted === '2026-01-01 00:00:00') {
+            $this->markTestSkipped('Database does not support fractional second precision (MySQL rounds DATETIME(0) to next year).');
+        }
+
         $data = $this->app()->getContainer()->make(CommunitySnapshotGenerator::class)->generate(2025)->data;
         $this->assertEquals(3, $data['total_posts']['count']);
         $this->assertEquals(6, $data['total_words']['total_words']);
