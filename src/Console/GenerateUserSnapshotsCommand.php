@@ -18,6 +18,7 @@ use Flarum\User\User;
 use HuseyinFiliz\Rewind\Metric\MetricRegistry;
 use HuseyinFiliz\Rewind\Model\CommunitySnapshot;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
+use HuseyinFiliz\Rewind\RewindYear;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -26,9 +27,11 @@ class GenerateUserSnapshotsCommand extends AbstractCommand
 {
     public function __construct(
         protected MetricRegistry $metricRegistry,
-        protected SettingsRepositoryInterface $settings
+        protected SettingsRepositoryInterface $settings,
+        protected ?RewindYear $years = null
     ) {
         parent::__construct();
+        $this->years = $this->years ?? resolve(RewindYear::class);
     }
 
     protected function configure(): void
@@ -46,7 +49,7 @@ class GenerateUserSnapshotsCommand extends AbstractCommand
     {
         @set_time_limit(0);
 
-        $activeYear = (int) $this->settings->get('huseyinfiliz-rewind.active_year', date('Y'));
+        $activeYear = $this->years->active();
         $yearArg = $this->input->getArgument('year');
         $year = $yearArg ? (int) $yearArg : $activeYear;
 
