@@ -1,20 +1,11 @@
 <?php
 
-/*
- * This file is part of huseyinfiliz/rewind.
- *
- * Copyright (c) 2026 Hüseyin Filiz.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace HuseyinFiliz\Rewind\Api\Controller;
 
 use Flarum\Http\RequestUtil;
-use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
+use HuseyinFiliz\Rewind\RewindYear;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -23,7 +14,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 class MissingUsersController implements RequestHandlerInterface
 {
     public function __construct(
-        protected SettingsRepositoryInterface $settings
+        protected RewindYear $years
     ) {
     }
 
@@ -38,12 +29,17 @@ class MissingUsersController implements RequestHandlerInterface
             $body = json_decode($raw, true) ?: [];
         }
 
-        $year = (int) ($body['year'] ?? $this->settings->get('huseyinfiliz-rewind.active_year', date('Y')));
+        $year = (int) ($body['year'] ?? $this->years->active());
         $groupId = isset($body['group']) ? (int) $body['group'] : null;
 
-        $query = User::where('is_email_confirmed', true)
-            ->whereNotIn('id', RewindSnapshot::where('year', $year)->select('user_id'))
-            ->orderBy('id');
+        $query = User::where('is_email_confirmed', true)->orderBy('id');
+        $snapshotUsers = RewindSnapshot::where('year', $year)->select('user_id');
+
+        if (! empty($body['regenerate'])) {
+            $query->whereIn('id', $snapshotUsers);
+        } else {
+            $query->whereNotIn('id', $snapshotUsers);
+        }
 
         if ($groupId) {
             $query->whereHas('groups', fn ($q) => $q->where('groups.id', $groupId));

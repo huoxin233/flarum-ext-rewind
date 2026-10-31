@@ -17,6 +17,7 @@ use HuseyinFiliz\Rewind\Api\Controller;
 use HuseyinFiliz\Rewind\Http\Controller\Admin as AdminController;
 use HuseyinFiliz\Rewind\Http\Controller\ShowCommunityRewindBladeController;
 use HuseyinFiliz\Rewind\Http\Controller\ShowUserRewindBladeController;
+use Illuminate\Console\Scheduling\Event;
 
 return [
     (new Extend\Frontend('forum'))
@@ -43,6 +44,10 @@ return [
         ->register(RewindServiceProvider::class),
 
     (new Extend\Console())
+        ->command(Console\GenerateCommand::class)
+        ->schedule(Console\GenerateCommand::class, function (Event $event): void {
+            $event->daily();
+        }, ['--automatic' => true])
         ->command(Console\GenerateCommunitySnapshotCommand::class)
         ->command(Console\GenerateUserSnapshotsCommand::class),
 
@@ -67,12 +72,14 @@ return [
         ->get('/rw-community/{id}', 'huseyinfiliz-rewind.community.show', Controller\ShowCommunitySnapshotController::class)
         ->post('/rw-community/generate', 'huseyinfiliz-rewind.community.generate', Controller\GenerateCommunitySnapshotController::class)
         ->post('/rw-community/generate-steps', 'huseyinfiliz-rewind.community.generate-steps', Controller\GenerateCommunityStepsController::class)
-        ->post('/rw-community/generate-step', 'huseyinfiliz-rewind.community.generate-step', Controller\GenerateCommunityStepController::class),
+        ->post('/rw-community/generate-step', 'huseyinfiliz-rewind.community.generate-step', Controller\GenerateCommunityStepController::class)
+        ->post('/rw-community/ensure', 'huseyinfiliz-rewind.community.ensure', Controller\EnsureCommunitySnapshotController::class),
 
     (new Extend\ApiSerializer(ForumSerializer::class))
         ->attribute('canViewRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->can('huseyinfiliz-rewind.viewForum'))
         ->attribute('canGenerateRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->can('huseyinfiliz-rewind.generate'))
-        ->attribute('canModerateRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->can('huseyinfiliz-rewind.moderate')),
+        ->attribute('canModerateRewind', fn (ForumSerializer $serializer) => $serializer->getActor()->can('huseyinfiliz-rewind.moderate'))
+        ->attribute('rewindPreviousYear', fn () => resolve(RewindYear::class)->previous()),
 
     (new Extend\Conditional())
         ->whenExtensionEnabled('flarum-likes', fn () => [
@@ -95,7 +102,8 @@ return [
     (new Extend\Settings())
         ->serializeToForum('rewindEnabled', 'huseyinfiliz-rewind.enabled', 'boolval')
         ->serializeToForum('rewindYearRenderModes', 'huseyinfiliz-rewind.year_render_modes')
-        ->serializeToForum('rewindActiveYear', 'huseyinfiliz-rewind.active_year', 'intval')
+        ->serializeToForum('rewindActiveYear', 'huseyinfiliz-rewind.active_year', RewindYear::class)
+        ->serializeToForum('rewindAutoCommunity', 'huseyinfiliz-rewind.automatic_community', 'boolval')
         ->serializeToForum('rewindShowMenu', 'huseyinfiliz-rewind.show_menu_link', 'boolval')
         ->serializeToForum('rewindHiddenUserSlides', 'huseyinfiliz-rewind.hidden_user_slides')
         ->serializeToForum('rewindHiddenCommunitySlides', 'huseyinfiliz-rewind.hidden_community_slides')
@@ -103,7 +111,9 @@ return [
         ->default('huseyinfiliz-rewind.public_content_only', true)
         ->default('huseyinfiliz-rewind.default_public', false)
         ->default('huseyinfiliz-rewind.year_render_modes', '{}')
-        ->default('huseyinfiliz-rewind.active_year', 2025)
+        ->default('huseyinfiliz-rewind.active_year', (int) gmdate('Y') - 1)
+        ->default('huseyinfiliz-rewind.automatic_year', true)
+        ->default('huseyinfiliz-rewind.automatic_community', false)
         ->default('huseyinfiliz-rewind.show_menu_link', true)
         ->default('huseyinfiliz-rewind.hidden_user_slides', '[]')
         ->default('huseyinfiliz-rewind.hidden_community_slides', '[]')

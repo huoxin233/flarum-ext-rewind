@@ -1,22 +1,13 @@
 <?php
 
-/*
- * This file is part of huseyinfiliz/rewind.
- *
- * Copyright (c) 2026 Hüseyin Filiz.
- *
- * For the full copyright and license information, please view the LICENSE.md
- * file that was distributed with this source code.
- */
-
 namespace HuseyinFiliz\Rewind\Api\Controller;
 
 use Carbon\Carbon;
 use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
-use Flarum\Settings\SettingsRepositoryInterface;
-use HuseyinFiliz\Rewind\Community\CommunityMetricRegistry;
+use HuseyinFiliz\Rewind\CommunitySnapshotGenerator;
 use HuseyinFiliz\Rewind\Model\CommunitySnapshot;
+use HuseyinFiliz\Rewind\RewindYear;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -25,8 +16,8 @@ use Psr\Http\Server\RequestHandlerInterface;
 class GenerateCommunitySnapshotController implements RequestHandlerInterface
 {
     public function __construct(
-        protected CommunityMetricRegistry $metricRegistry,
-        protected SettingsRepositoryInterface $settings
+        protected CommunitySnapshotGenerator $generator,
+        protected RewindYear $years,
     ) {
     }
 
@@ -35,8 +26,18 @@ class GenerateCommunitySnapshotController implements RequestHandlerInterface
         $actor = RequestUtil::getActor($request);
         $actor->assertAdmin();
 
-        $year = (int) $this->settings->get('huseyinfiliz-rewind.active_year', date('Y'));
+        $body = $request->getParsedBody();
+        if (empty($body)) {
+            $raw = (string) $request->getBody();
+            $body = json_decode($raw, true) ?: [];
+        }
 
+        $year = (int) ($body['year'] ?? $this->years->active());
+        if ($year < 2000 || $year > $this->years->active()) {
+            throw new ValidationException(['year' => 'Invalid recap year.']);
+        }
+
+        // Rate limit: 1 regenerate per minute per year
         $existing = CommunitySnapshot::where('year', $year)->first();
         if ($existing && $existing->generated_at && $existing->generated_at->diffInSeconds(Carbon::now()) < 60) {
             throw new ValidationException([
@@ -44,12 +45,7 @@ class GenerateCommunitySnapshotController implements RequestHandlerInterface
             ]);
         }
 
-        $data = $this->metricRegistry->compute($year);
-
-        $snapshot = CommunitySnapshot::updateOrCreate(
-            ['year' => $year],
-            ['data' => $data, 'generated_at' => Carbon::now()]
-        );
+        $snapshot = $this->generator->generate($year, true);
 
         return new JsonResponse([
             'data' => [
