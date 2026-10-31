@@ -4,7 +4,6 @@ namespace HuseyinFiliz\Rewind\Metric;
 
 use Flarum\Extension\ExtensionManager;
 use Flarum\User\User;
-use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\QueryException;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -16,7 +15,6 @@ class MetricRegistry
 
     public function __construct(
         protected ExtensionManager $extensions,
-        protected ConnectionInterface $db,
         protected ?LoggerInterface $logger = null,
     ) {
     }
@@ -36,13 +34,8 @@ class MetricRegistry
             }
 
             try {
-                $this->db->beginTransaction();
                 $result[$metric->key()] = $metric->calculate($user, $year);
-                $this->db->commit();
             } catch (QueryException $e) {
-                if ($this->db->transactionLevel() > 0) {
-                    $this->db->rollBack();
-                }
                 $this->logger?->error("Rewind metric query failed: {$metric->key()}", ['exception' => $e]);
                 // Some optional ecosystem tables may not exist in every install/test environment.
                 // Keep response shape stable for known keys expected by consumers/tests.
@@ -51,9 +44,6 @@ class MetricRegistry
                     $result[$metric->key()] = $fallback;
                 }
             } catch (Throwable $e) {
-                if ($this->db->transactionLevel() > 0) {
-                    $this->db->rollBack();
-                }
                 $this->logger?->error("Rewind metric failed: {$metric->key()}", ['exception' => $e]);
 
                 $fallback = $this->fallbackForKey($metric->key());
@@ -75,6 +65,7 @@ class MetricRegistry
                 'discussion_title' => null,
                 'metric_type' => null,
                 'count' => 0,
+                'excerpt' => null,
                 'content_html' => null,
             ],
             'most_active_month' => [

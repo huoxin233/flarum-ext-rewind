@@ -19,6 +19,7 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Throwable;
 
 class UpdateTemplateController implements RequestHandlerInterface
 {
@@ -65,7 +66,7 @@ class UpdateTemplateController implements RequestHandlerInterface
             return new JsonResponse([
                 'error' => $e->getMessage(),
             ], 400);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return new JsonResponse([
                 'error' => 'Failed to update template: '.$e->getMessage(),
             ], 500);

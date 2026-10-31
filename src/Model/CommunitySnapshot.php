@@ -2,15 +2,26 @@
 
 namespace HuseyinFiliz\Rewind\Model;
 
+use Carbon\Carbon;
 use Flarum\Database\AbstractModel;
 
+/**
+ * @property int $id
+ * @property int $year
+ * @property array<string, mixed> $data
+ * @property Carbon $generated_at
+ */
 class CommunitySnapshot extends AbstractModel
 {
     protected $table = 'rw_community';
 
     public $timestamps = false;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'year',
+        'data',
+        'generated_at',
+    ];
 
     protected $casts = [
         'data' => 'array',

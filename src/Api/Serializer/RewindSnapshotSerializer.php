@@ -41,6 +41,8 @@ class RewindSnapshotSerializer extends AbstractSerializer
             $data = $snapshot->data ?? [];
         }
 
+        $canViewContent = $isOwner || $canModerate || $snapshot->is_public;
+
         return [
             'year' => (int) $snapshot->year,
             'data' => $data,
@@ -48,7 +50,7 @@ class RewindSnapshotSerializer extends AbstractSerializer
             'isPublic' => (bool) $snapshot->is_public,
             'canEdit' => $isOwner || $canModerate,
             'canModerate' => $canModerate,
-            'isEmpty' => $this->isSnapshotEmpty($snapshot->data),
+            'isEmpty' => $canViewContent ? $this->isSnapshotEmpty($snapshot->data) : false,
         ];
     }
 

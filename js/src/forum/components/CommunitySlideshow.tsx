@@ -716,7 +716,7 @@ export default class CommunitySlideshow extends Page {
             </div>
             <span className="rw-post-preview-disc">{d.discussion_title}</span>
           </div>
-          {(d.content_html || d.excerpt) && <div className="rw-post-preview-body">{m.trust(d.content_html || d.excerpt)}</div>}
+          {(d.content_html || d.excerpt) && <div className="rw-post-preview-body">{d.content_html ? m.trust(d.content_html) : d.excerpt}</div>}
           <div className="rw-quote-meta" style={{ opacity: 0.6 }}>
             <i className="fas fa-heart" /> {d.like_count}
           </div>
@@ -748,7 +748,7 @@ export default class CommunitySlideshow extends Page {
           </div>
           {(d.content_html || d.excerpt) && (
             <div className="rw-post-preview-body" style={{ opacity: 0.7 }}>
-              {m.trust(d.content_html || d.excerpt)}
+              {d.content_html ? m.trust(d.content_html) : d.excerpt}
             </div>
           )}
         </div>

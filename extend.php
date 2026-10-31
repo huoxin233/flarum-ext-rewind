@@ -87,7 +87,7 @@ return [
             (new Extend\ServiceProvider())
                 ->register(Metric\Optional\BadgesMetricsProvider::class),
         ])
-        ->whenExtensionEnabled('flarum-best-answer', fn () => [
+        ->whenExtensionEnabled('fof-best-answer', fn () => [
             (new Extend\ServiceProvider())
                 ->register(Metric\Optional\BestAnswersMetricsProvider::class),
         ]),
@@ -100,6 +100,8 @@ return [
         ->serializeToForum('rewindHiddenUserSlides', 'huseyinfiliz-rewind.hidden_user_slides')
         ->serializeToForum('rewindHiddenCommunitySlides', 'huseyinfiliz-rewind.hidden_community_slides')
         ->default('huseyinfiliz-rewind.enabled', false)
+        ->default('huseyinfiliz-rewind.public_content_only', true)
+        ->default('huseyinfiliz-rewind.default_public', false)
         ->default('huseyinfiliz-rewind.year_render_modes', '{}')
         ->default('huseyinfiliz-rewind.active_year', 2025)
         ->default('huseyinfiliz-rewind.show_menu_link', true)

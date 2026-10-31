@@ -2,13 +2,19 @@
 
 namespace HuseyinFiliz\Rewind\Community\Metric;
 
+use Flarum\Formatter\Formatter;
 use HuseyinFiliz\Rewind\Community\CommunityMetric;
+use HuseyinFiliz\Rewind\ContentCleaner;
+use HuseyinFiliz\Rewind\ContentVisibility;
 use Illuminate\Database\ConnectionInterface;
+use Throwable;
 
 class StarPost implements CommunityMetric
 {
     public function __construct(
         protected ConnectionInterface $db,
+        protected ContentVisibility $visibility,
+        protected ?Formatter $formatter = null,
     ) {
     }
 
@@ -27,11 +33,17 @@ class StarPost implements CommunityMetric
         $prefix = $this->db->getTablePrefix();
 
         $result = $this->db->table('posts')
+            ->whereIn('posts.id', $this->visibility->posts()->select('posts.id'))
             ->leftJoin('post_likes', 'posts.id', '=', 'post_likes.post_id')
             ->join('discussions', 'posts.discussion_id', '=', 'discussions.id')
             ->join('users', 'posts.user_id', '=', 'users.id')
             ->where('posts.type', 'comment')
-            ->whereYear('posts.created_at', $year)
+            ->whereNull('posts.hidden_at')
+            ->where('posts.is_private', false)
+            ->whereNull('discussions.hidden_at')
+            ->where('discussions.is_private', false)
+            ->where('posts.created_at', '>=', "$year-01-01 00:00:00")
+            ->where('posts.created_at', '<', ($year + 1).'-01-01 00:00:00')
             ->select('posts.id', 'posts.user_id', 'posts.content', 'posts.discussion_id', 'discussions.title as discussion_title', 'users.username')
             ->selectRaw('COUNT('.$prefix.'post_likes.user_id) as like_count')
             ->groupBy('posts.id', 'posts.user_id', 'posts.content', 'posts.discussion_id', 'discussions.title', 'users.username')
@@ -43,10 +55,9 @@ class StarPost implements CommunityMetric
         }
 
         try {
-            $formatter = resolve(\Flarum\Formatter\Formatter::class);
-            $contentHtml = $formatter->render($result->content ?? '');
-        } catch (\Throwable $e) {
-            $contentHtml = \HuseyinFiliz\Rewind\ContentCleaner::excerpt($result->content ?? '');
+            $contentHtml = $this->formatter ? $this->formatter->render($result->content ?? '') : htmlspecialchars(ContentCleaner::excerpt($result->content ?? ''), ENT_QUOTES, 'UTF-8');
+        } catch (Throwable) {
+            $contentHtml = htmlspecialchars(ContentCleaner::excerpt($result->content ?? ''), ENT_QUOTES, 'UTF-8');
         }
 
         return [
@@ -56,6 +67,7 @@ class StarPost implements CommunityMetric
             'discussion_id' => (int) $result->discussion_id,
             'discussion_title' => $result->discussion_title,
             'like_count' => (int) $result->like_count,
+            'excerpt' => ContentCleaner::excerpt($result->content ?? ''),
             'content_html' => $contentHtml,
         ];
     }
@@ -69,6 +81,7 @@ class StarPost implements CommunityMetric
             'discussion_id' => null,
             'discussion_title' => null,
             'like_count' => 0,
+            'excerpt' => null,
             'content_html' => null,
         ];
     }

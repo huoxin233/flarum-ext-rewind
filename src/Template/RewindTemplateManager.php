@@ -17,6 +17,7 @@ use HuseyinFiliz\Rewind\Template\Exception\InvalidTemplateException;
 use HuseyinFiliz\Rewind\Template\Exception\TemplateAlreadyExistsException;
 use HuseyinFiliz\Rewind\Template\Exception\TemplateNotFoundException;
 use Illuminate\Contracts\View\Factory as ViewFactory;
+use RuntimeException;
 
 class RewindTemplateManager
 {
@@ -255,16 +256,16 @@ class RewindTemplateManager
 
         $builtinPath = $parsed['builtinPath'];
         if (! file_exists($builtinPath)) {
-            throw new \RuntimeException("Built-in template '{$builtinPath}' not found.");
+            throw new RuntimeException("Built-in template '{$builtinPath}' not found.");
         }
 
         $content = file_get_contents($builtinPath);
         if ($content === false) {
-            throw new \RuntimeException("Failed to read built-in template '{$builtinPath}'.");
+            throw new RuntimeException("Failed to read built-in template '{$builtinPath}'.");
         }
 
         if (file_put_contents($destPath, $content, LOCK_EX) === false) {
-            throw new \RuntimeException("Failed to write template file to '{$destPath}'.");
+            throw new RuntimeException("Failed to write template file to '{$destPath}'.");
         }
 
         $this->clearCompiledViewCache();
@@ -297,7 +298,7 @@ class RewindTemplateManager
         }
 
         if (file_put_contents($destPath, $content, LOCK_EX) === false) {
-            throw new \RuntimeException("Failed to save template file '{$destPath}'.");
+            throw new RuntimeException("Failed to save template file '{$destPath}'.");
         }
 
         $this->clearCompiledViewCache();
@@ -324,7 +325,7 @@ class RewindTemplateManager
         }
 
         if (! @unlink($destPath)) {
-            throw new \RuntimeException("Failed to delete template file '{$destPath}'.");
+            throw new RuntimeException("Failed to delete template file '{$destPath}'.");
         }
 
         $this->clearCompiledViewCache();

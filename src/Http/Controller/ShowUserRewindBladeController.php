@@ -17,12 +17,14 @@ use Flarum\Http\UrlGenerator;
 use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\User;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
+use HuseyinFiliz\Rewind\SnapshotVisibility;
 use HuseyinFiliz\Rewind\View\RewindViewResolver;
 use Illuminate\Contracts\Container\Container;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Throwable;
 
 class ShowUserRewindBladeController implements RequestHandlerInterface
 {
@@ -76,7 +78,7 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
                             }
                         }
                     }
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                     // Fallback below
                 }
             }
@@ -197,7 +199,7 @@ class ShowUserRewindBladeController implements RequestHandlerInterface
                     return $url;
                 }
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
         }
 
         return $baseUrl !== '' ? "{$baseUrl}/assets/forum.css" : '/assets/forum.css';

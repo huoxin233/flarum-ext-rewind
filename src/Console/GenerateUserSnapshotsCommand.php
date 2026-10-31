@@ -98,24 +98,27 @@ class GenerateUserSnapshotsCommand extends AbstractCommand
             $communitySnapshot = CommunitySnapshot::where('year', $year)->first();
             if ($communitySnapshot && $communitySnapshot->data) {
                 $cd = $communitySnapshot->data;
-                $memberCount = max(1, $cd['new_users']['count'] ?? 1);
-                $totalPosts = $cd['total_posts']['count'] ?? 0;
-                $totalDiscussions = $cd['total_discussions']['count'] ?? 0;
-                $totalWords = $cd['total_words']['total_words'] ?? 0;
+                $memberCount = $cd['active_members']['count'] ?? ($cd['new_users']['count'] ?? 0);
+                if ($memberCount > 0) {
+                    $totalPosts = $cd['total_posts']['count'] ?? 0;
+                    $totalDiscussions = $cd['total_discussions']['count'] ?? 0;
+                    $totalWords = $cd['total_words']['total_words'] ?? 0;
 
-                $communityAvg = [
-                    'posts' => $memberCount > 0 ? round($totalPosts / $memberCount, 1) : 0,
-                    'discussions' => $memberCount > 0 ? round($totalDiscussions / $memberCount, 1) : 0,
-                    'words' => $memberCount > 0 ? round($totalWords / $memberCount) : 0,
-                ];
+                    $communityAvg = [
+                        'posts' => round($totalPosts / $memberCount, 1),
+                        'discussions' => round($totalDiscussions / $memberCount, 1),
+                        'words' => round($totalWords / $memberCount),
+                    ];
+                }
             }
         }
 
+        $defaultPublic = (bool) $this->settings->get('huseyinfiliz-rewind.default_public', false);
         $progressBar = new ProgressBar($this->output, $totalUsers);
         $progressBar->start();
 
         $processed = 0;
-        $query->chunk(100, function ($users) use ($year, $communityAvg, $progressBar, &$processed) {
+        $query->chunk(100, function ($users) use ($year, $communityAvg, $defaultPublic, $progressBar, &$processed) {
             foreach ($users as $user) {
                 $data = $this->metricRegistry->compute($user, $year);
 
@@ -123,11 +126,14 @@ class GenerateUserSnapshotsCommand extends AbstractCommand
                     $data['_community_avg'] = $communityAvg;
                 }
 
+                $existing = RewindSnapshot::where('user_id', $user->id)->where('year', $year)->first();
+
                 RewindSnapshot::updateOrCreate(
                     ['user_id' => $user->id, 'year' => $year],
                     [
                         'data' => $data,
                         'generated_at' => Carbon::now(),
+                        'is_public' => $existing ? $existing->is_public : $defaultPublic,
                     ]
                 );
 

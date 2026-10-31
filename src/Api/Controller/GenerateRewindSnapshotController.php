@@ -81,16 +81,18 @@ class GenerateRewindSnapshotController extends AbstractCreateController
                 $communitySnapshot = CommunitySnapshot::where('year', $year)->first();
                 if ($communitySnapshot && $communitySnapshot->data) {
                     $cd = $communitySnapshot->data;
-                    $memberCount = max(1, $cd['new_users']['count'] ?? 1);
-                    $totalPosts = $cd['total_posts']['count'] ?? 0;
-                    $totalDiscussions = $cd['total_discussions']['count'] ?? 0;
-                    $totalWords = $cd['total_words']['total_words'] ?? 0;
+                    $memberCount = $cd['active_members']['count'] ?? ($cd['new_users']['count'] ?? 0);
+                    if ($memberCount > 0) {
+                        $totalPosts = $cd['total_posts']['count'] ?? 0;
+                        $totalDiscussions = $cd['total_discussions']['count'] ?? 0;
+                        $totalWords = $cd['total_words']['total_words'] ?? 0;
 
-                    $data['_community_avg'] = [
-                        'posts' => $memberCount > 0 ? round($totalPosts / $memberCount, 1) : 0,
-                        'discussions' => $memberCount > 0 ? round($totalDiscussions / $memberCount, 1) : 0,
-                        'words' => $memberCount > 0 ? round($totalWords / $memberCount) : 0,
-                    ];
+                        $data['_community_avg'] = [
+                            'posts' => round($totalPosts / $memberCount, 1),
+                            'discussions' => round($totalDiscussions / $memberCount, 1),
+                            'words' => round($totalWords / $memberCount),
+                        ];
+                    }
                 }
             }
 
@@ -99,7 +101,7 @@ class GenerateRewindSnapshotController extends AbstractCreateController
                 [
                     'data' => $data,
                     'generated_at' => Carbon::now(),
-                    'is_public' => $existing ? $existing->is_public : false,
+                    'is_public' => $existing ? $existing->is_public : (bool) $this->settings->get('huseyinfiliz-rewind.default_public', false),
                 ]
             );
         } finally {

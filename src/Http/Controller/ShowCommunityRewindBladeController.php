@@ -23,6 +23,7 @@ use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Throwable;
 
 class ShowCommunityRewindBladeController implements RequestHandlerInterface
 {
@@ -78,7 +79,7 @@ class ShowCommunityRewindBladeController implements RequestHandlerInterface
                             }
                         }
                     }
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                     // Fallback below
                 }
             }
@@ -172,7 +173,7 @@ class ShowCommunityRewindBladeController implements RequestHandlerInterface
                     return $url;
                 }
             }
-        } catch (\Throwable) {
+        } catch (Throwable) {
         }
 
         return $baseUrl !== '' ? "{$baseUrl}/assets/forum.css" : '/assets/forum.css';

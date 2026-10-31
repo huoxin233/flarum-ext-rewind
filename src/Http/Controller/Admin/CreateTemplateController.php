@@ -19,6 +19,7 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Throwable;
 
 class CreateTemplateController implements RequestHandlerInterface
 {
@@ -57,7 +58,7 @@ class CreateTemplateController implements RequestHandlerInterface
             return new JsonResponse([
                 'error' => $e->getMessage(),
             ], 409);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return new JsonResponse([
                 'error' => 'Failed to create template: '.$e->getMessage(),
             ], 500);
