@@ -31,9 +31,20 @@ class GenerationLock
         return $lock;
     }
 
+    public function isOwned(Lock $lock): bool
+    {
+        // In Laravel 10+ (Flarum 2.x), isOwnedByCurrentProcess() is public.
+        // In Laravel 8 (Flarum 1.x), it is protected, so we bind the closure to invoke it.
+        $check = function (): bool {
+            return (bool) $this->isOwnedByCurrentProcess();
+        };
+
+        return (bool) $check->call($lock);
+    }
+
     public function assertOwned(Lock $lock): void
     {
-        if (! $lock->isOwnedByCurrentProcess()) {
+        if (! $this->isOwned($lock)) {
             throw new ValidationException(['rate_limit' => 'The generation lock expired. Please retry.']);
         }
     }

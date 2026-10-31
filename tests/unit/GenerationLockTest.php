@@ -42,7 +42,7 @@ class GenerationLockTest extends TestCase
         $replacement = $locks->acquire('community_2025');
 
         $this->assertFalse($old->release());
-        $this->assertTrue($replacement->isOwnedByCurrentProcess());
+        $this->assertTrue($locks->isOwned($replacement));
 
         try {
             $this->expectException(ValidationException::class);
