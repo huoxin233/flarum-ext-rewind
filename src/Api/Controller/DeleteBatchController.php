@@ -13,6 +13,7 @@ namespace HuseyinFiliz\Rewind\Api\Controller;
 
 use Flarum\Foundation\ValidationException;
 use Flarum\Http\RequestUtil;
+use Flarum\User\User;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -32,13 +33,21 @@ class DeleteBatchController implements RequestHandlerInterface
             $body = json_decode($raw, true) ?: [];
         }
 
-        $year = isset($body['year']) ? (int) $body['year'] : null;
+        $year = (int) ($body['year'] ?? 0);
 
-        if (! $year) {
-            throw new ValidationException(['year' => 'Year is required.']);
+        if ($year < 2000 || $year > 2100) {
+            throw new ValidationException(['year' => 'Year must be between 2000 and 2100.']);
         }
 
-        $count = RewindSnapshot::where('year', $year)->delete();
+        $query = RewindSnapshot::where('year', $year);
+
+        $groupId = isset($body['group']) && $body['group'] !== null ? (int) $body['group'] : null;
+        if ($groupId) {
+            $userIds = User::whereHas('groups', fn ($q) => $q->where('groups.id', $groupId))->select('id');
+            $query->whereIn('user_id', $userIds);
+        }
+
+        $count = $query->delete();
 
         return new JsonResponse(['deleted' => $count]);
     }

@@ -32,7 +32,7 @@ export default class CreateTemplateModal extends Modal<CreateTemplateModalAttrs>
 
   oninit(vnode: Mithril.Vnode<CreateTemplateModalAttrs>) {
     super.oninit(vnode);
-    this.year = this.attrs.activeYear || new Date().getFullYear();
+    this.year = this.attrs.activeYear || app.forum.attribute<number>('rewindPreviousYear') || new Date().getFullYear() - 1;
   }
 
   className(): string {

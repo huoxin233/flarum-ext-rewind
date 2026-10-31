@@ -17,6 +17,7 @@ use Flarum\Http\UrlGenerator;
 use Flarum\Settings\SettingsRepositoryInterface;
 use HuseyinFiliz\Rewind\Api\Serializer\RewindSnapshotSerializer;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
+use HuseyinFiliz\Rewind\SnapshotVisibility;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
 
@@ -61,14 +62,7 @@ class ListRewindSnapshotsController extends AbstractListController
             $query->where('year', (int) $filters['year']);
         }
 
-        if (! $canModerate) {
-            $query->where(function ($q) use ($actor) {
-                $q->where('is_public', true);
-                if ($actor->id) {
-                    $q->orWhere('user_id', $actor->id);
-                }
-            });
-        }
+        SnapshotVisibility::scope($query, $actor);
 
         foreach ($sort ?: [] as $field => $order) {
             $query->orderBy($field, $order);

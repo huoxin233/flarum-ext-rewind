@@ -13,7 +13,6 @@ namespace HuseyinFiliz\Rewind\Api\Controller;
 
 use Flarum\Http\RequestUtil;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
-use Illuminate\Support\Facades\DB;
 use Laminas\Diactoros\Response\JsonResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
