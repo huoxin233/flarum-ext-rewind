@@ -292,6 +292,10 @@ class RewindTemplateManager
             throw new TemplateNotFoundException("Custom template '{$id}' does not exist. Create it first before editing.");
         }
 
+        if (preg_match('/<\?(?:php|=)/i', $content)) {
+            throw new InvalidTemplateException('Raw PHP tags are not permitted in template files.');
+        }
+
         if (file_put_contents($destPath, $content, LOCK_EX) === false) {
             throw new \RuntimeException("Failed to save template file '{$destPath}'.");
         }
