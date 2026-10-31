@@ -9,13 +9,20 @@ use HuseyinFiliz\Rewind\Metric\Core;
 use HuseyinFiliz\Rewind\Metric\MetricRegistry;
 use HuseyinFiliz\Rewind\Template\RewindTemplateManager;
 use HuseyinFiliz\Rewind\View\RewindViewResolver;
+use Illuminate\Contracts\Cache\Store;
 
 class RewindServiceProvider extends AbstractServiceProvider
 {
     public function register(): void
     {
         $this->container->singleton(ContentVisibility::class);
-        $this->container->singleton(GenerationLock::class, fn ($container) => new GenerationLock($container->make('cache.store')));
+        $this->container->singleton(GenerationLock::class, function ($container) {
+            $store = $container->bound('cache.store')
+                ? $container->make('cache.store')->getStore()
+                : $container->make(Store::class);
+
+            return new GenerationLock($store);
+        });
         $this->container->singleton(RewindYear::class);
         $this->container->singleton(RewindViewResolver::class);
         $this->container->singleton(RewindTemplateManager::class);
