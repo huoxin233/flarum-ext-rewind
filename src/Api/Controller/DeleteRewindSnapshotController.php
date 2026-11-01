@@ -22,12 +22,11 @@ class DeleteRewindSnapshotController extends AbstractDeleteController
 {
     protected function delete(ServerRequestInterface $request)
     {
-        $id = Arr::get($request->getQueryParams(), 'id');
         $actor = RequestUtil::getActor($request);
-
-        $snapshot = RewindSnapshot::findOrFail($id);
-
         $actor->assertCan('huseyinfiliz-rewind.moderate');
+
+        $id = Arr::get($request->getQueryParams(), 'id');
+        $snapshot = RewindSnapshot::findOrFail($id);
 
         $snapshot->delete();
     }

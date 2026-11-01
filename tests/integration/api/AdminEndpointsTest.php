@@ -18,6 +18,7 @@ class AdminEndpointsTest extends TestCase
 
         $this->setting('huseyinfiliz-rewind.enabled', true);
         $this->setting('huseyinfiliz-rewind.active_year', 2025);
+        $this->setting('huseyinfiliz-rewind.automatic_year', false);
 
         $this->prepareDatabase([
             'users' => [
@@ -107,6 +108,18 @@ class AdminEndpointsTest extends TestCase
         $this->assertContains(3, $missingIds);
         $this->assertContains(4, $missingIds);
         $this->assertNotContains(2, $missingIds);
+    }
+
+    /** @test */
+    public function admin_can_select_existing_snapshots_for_safe_refresh()
+    {
+        $response = $this->send($this->request('POST', '/api/rw-snaps/missing-users', [
+            'authenticatedAs' => 1,
+            'json' => ['year' => 2025, 'regenerate' => true],
+        ]));
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertSame([2], array_column(json_decode((string) $response->getBody(), true)['users'], 'id'));
     }
 
     /** @test */

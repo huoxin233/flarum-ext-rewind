@@ -109,9 +109,16 @@ class ShowUserRewindBladeControllerTest extends TestCase
             $this->request('GET', '/rewind/view/4/2025', ['authenticatedAs' => 2])
         );
 
-        $this->assertEquals(403, $response->getStatusCode());
+        $this->assertEquals(404, $response->getStatusCode());
         $body = (string) $response->getBody();
-        $this->assertStringContainsString('Private Rewind', $body);
+        $this->assertStringContainsString('Rewind Not Found', $body);
+
+        $this->database()->table('rw_snaps')->where('id', 2)->delete();
+        $missing = $this->send(
+            $this->request('GET', '/rewind/view/4/2025', ['authenticatedAs' => 2])
+        );
+        $this->assertEquals($missing->getStatusCode(), $response->getStatusCode());
+        $this->assertSame((string) $missing->getBody(), $body);
     }
 
     /** @test */

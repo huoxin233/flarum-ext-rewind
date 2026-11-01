@@ -19,6 +19,7 @@ class DeleteSnapshotTest extends TestCase
 
         $this->setting('huseyinfiliz-rewind.enabled', true);
         $this->setting('huseyinfiliz-rewind.active_year', 2025);
+        $this->setting('huseyinfiliz-rewind.automatic_year', false);
 
         $this->prepareDatabase([
             'users' => [
@@ -44,6 +45,16 @@ class DeleteSnapshotTest extends TestCase
     {
         $response = $this->send(
             $this->request('DELETE', '/api/rw-snaps/1', ['authenticatedAs' => 2])
+        );
+
+        $this->assertEquals(403, $response->getStatusCode());
+    }
+
+    /** @test */
+    public function non_moderator_cannot_enumerate_snapshots_via_delete()
+    {
+        $response = $this->send(
+            $this->request('DELETE', '/api/rw-snaps/9999', ['authenticatedAs' => 2])
         );
 
         $this->assertEquals(403, $response->getStatusCode());

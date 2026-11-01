@@ -24,7 +24,6 @@ use Laminas\Diactoros\Response\HtmlResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Throwable;
 
 class ShowCommunityRewindBladeController implements RequestHandlerInterface
 {
@@ -52,41 +51,11 @@ class ShowCommunityRewindBladeController implements RequestHandlerInterface
         $forumTitle = (string) $this->settings->get('forum_title', 'Flarum');
         $baseUrl = rtrim($this->url->to('forum')->base(), '/');
 
-        if ($renderMode === 'slideshow') {
-            if ($this->container->has('flarum.frontend.forum')) {
-                try {
-                    /** @var Frontend $frontend */
-                    $frontend = $this->container->make('flarum.frontend.forum');
-                    $document = $frontend->document($request);
+        if ($renderMode === 'slideshow' && $this->container->has('flarum.frontend.forum')) {
+            /** @var Frontend $frontend */
+            $frontend = $this->container->make('flarum.frontend.forum');
 
-                    if (method_exists($document, 'render')) {
-                        return new HtmlResponse($document->render(), 200);
-                    }
-
-                    if ($this->container->has('view')) {
-                        $view = $this->container->make('view');
-                        $viewNames = [
-                            'flarum.forum::frontend.app',
-                            'flarum.forum::app',
-                            'flarum.forum::frontend.forum',
-                            'flarum.frontend::frontend',
-                            'flarum.frontend::app',
-                            'flarum::frontend.app',
-                            'flarum::app',
-                        ];
-
-                        foreach ($viewNames as $name) {
-                            if ($view->exists($name)) {
-                                return new HtmlResponse($view->make($name, ['document' => $document])->render(), 200);
-                            }
-                        }
-                    }
-                } catch (Throwable $e) {
-                    // Fallback below
-                }
-            }
-
-            return new HtmlResponse('<!DOCTYPE html><html><head><title>' . htmlspecialchars($forumTitle) . '</title></head><body><div id="app"></div><div id="flarum"></div></body></html>', 200);
+            return new HtmlResponse($frontend->document($request)->render());
         }
 
         $actor = RequestUtil::getActor($request);

@@ -72,9 +72,12 @@ class GenerateUserSnapshotsCommand extends AbstractCommand
                 $query->where('username', $singleUser);
             }
         } elseif ($groupId) {
-            $query->whereHas('groups', function ($q) use ($groupId) {
-                $q->where('id', (int) $groupId);
-            });
+            $query->where('is_email_confirmed', true)
+                ->whereHas('groups', function ($q) use ($groupId) {
+                    $q->where('groups.id', (int) $groupId);
+                });
+        } else {
+            $query->where('is_email_confirmed', true);
         }
 
         if (! $force) {

@@ -17,6 +17,7 @@ use Flarum\Settings\SettingsRepositoryInterface;
 use Flarum\User\Exception\PermissionDeniedException;
 use HuseyinFiliz\Rewind\Api\Serializer\RewindSnapshotSerializer;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
+use HuseyinFiliz\Rewind\SnapshotVisibility;
 use Illuminate\Support\Arr;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
@@ -44,6 +45,9 @@ class ShowRewindSnapshotController extends AbstractShowController
             throw new PermissionDeniedException();
         }
 
-        return RewindSnapshot::findOrFail($id);
+        $query = RewindSnapshot::where('id', $id);
+        SnapshotVisibility::scope($query, $actor);
+
+        return $query->firstOrFail();
     }
 }

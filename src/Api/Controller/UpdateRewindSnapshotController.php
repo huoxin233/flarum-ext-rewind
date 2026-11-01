@@ -16,6 +16,7 @@ use Flarum\Http\RequestUtil;
 use Flarum\User\Exception\PermissionDeniedException;
 use HuseyinFiliz\Rewind\Api\Serializer\RewindSnapshotSerializer;
 use HuseyinFiliz\Rewind\Model\RewindSnapshot;
+use HuseyinFiliz\Rewind\SnapshotVisibility;
 use Illuminate\Support\Arr;
 use Psr\Http\Message\ServerRequestInterface;
 use Tobscure\JsonApi\Document;
@@ -29,7 +30,9 @@ class UpdateRewindSnapshotController extends AbstractShowController
         $id = Arr::get($request->getQueryParams(), 'id');
         $actor = RequestUtil::getActor($request);
 
-        $snapshot = RewindSnapshot::findOrFail($id);
+        $query = RewindSnapshot::where('id', $id);
+        SnapshotVisibility::scope($query, $actor);
+        $snapshot = $query->firstOrFail();
 
         $isOwner = (int) $snapshot->user_id === (int) $actor->id;
         $canModerate = $actor->can('huseyinfiliz-rewind.moderate');
@@ -42,6 +45,9 @@ class UpdateRewindSnapshotController extends AbstractShowController
         $attributes = Arr::get($body, 'data.attributes', []);
 
         if (array_key_exists('isPublic', $attributes)) {
+            if (! $isOwner) {
+                throw new PermissionDeniedException();
+            }
             $snapshot->is_public = (bool) $attributes['isPublic'];
             $snapshot->save();
         }

@@ -60,33 +60,47 @@ class RewindSnapshotSerializer extends AbstractSerializer
             return true;
         }
 
-        $hasActivity = false;
-        foreach ($data as $metric) {
-            if (is_array($metric)) {
-                if (isset($metric['count']) && $metric['count'] > 0) {
-                    $hasActivity = true;
-                    break;
-                }
-                if (isset($metric['interaction_count']) && $metric['interaction_count'] > 0) {
-                    $hasActivity = true;
-                    break;
-                }
-                if (isset($metric['mention_count']) && $metric['mention_count'] > 0) {
-                    $hasActivity = true;
-                    break;
-                }
-                if (! empty($metric['post_id'])) {
-                    $hasActivity = true;
-                    break;
-                }
-                if (! empty($metric['user_id'])) {
-                    $hasActivity = true;
-                    break;
-                }
+        foreach ($data as $key => $value) {
+            if (str_starts_with((string) $key, '_')) {
+                continue;
+            }
+            if (! is_array($value)) {
+                continue;
+            }
+
+            if (isset($value['count']) && $value['count'] > 0) {
+                return false;
+            }
+            if (isset($value['total']) && $value['total'] > 0) {
+                return false;
+            }
+            if (isset($value['interaction_count']) && $value['interaction_count'] > 0) {
+                return false;
+            }
+            if (isset($value['mention_count']) && $value['mention_count'] > 0) {
+                return false;
+            }
+            if (! empty($value['user_id'])) {
+                return false;
+            }
+            if (! empty($value['post_id'])) {
+                return false;
+            }
+            if (! empty($value['words'])) {
+                return false;
+            }
+            if (! empty($value['emojis'])) {
+                return false;
+            }
+            if (isset($value['peak_hour'])) {
+                return false;
+            }
+            if (isset($value['peak_month']) && $value['peak_month'] > 0) {
+                return false;
             }
         }
 
-        return ! $hasActivity;
+        return true;
     }
 
     protected function user($snapshot): ?Relationship
