@@ -51,11 +51,19 @@ class ShowCommunityRewindBladeController implements RequestHandlerInterface
         $forumTitle = (string) $this->settings->get('forum_title', 'Flarum');
         $baseUrl = rtrim($this->url->to('forum')->base(), '/');
 
-        if ($renderMode === 'slideshow' && $this->container->has('flarum.frontend.forum')) {
-            /** @var Frontend $frontend */
-            $frontend = $this->container->make('flarum.frontend.forum');
+        if ($renderMode === 'slideshow') {
+            if ($this->container->has('flarum.frontend.forum')) {
+                try {
+                    /** @var Frontend $frontend */
+                    $frontend = $this->container->make('flarum.frontend.forum');
 
-            return new HtmlResponse($frontend->document($request)->render());
+                    return new HtmlResponse($frontend->document($request)->render(), 200);
+                } catch (\Throwable) {
+                    // Fall back to HTML skeleton when frontend assets are uncompiled
+                }
+            }
+
+            return new HtmlResponse('<!DOCTYPE html><html><head><title>'.htmlspecialchars($forumTitle).'</title></head><body><div id="app"></div><div id="flarum"></div></body></html>', 200);
         }
 
         $actor = RequestUtil::getActor($request);
@@ -108,9 +116,13 @@ class ShowCommunityRewindBladeController implements RequestHandlerInterface
                 && $this->container->has('flarum.frontend.forum')) {
                 // The forum component drives the bounded POST generation steps,
                 // then reloads this URL to render the completed Blade recap.
-                $frontend = $this->container->make('flarum.frontend.forum');
+                try {
+                    $frontend = $this->container->make('flarum.frontend.forum');
 
-                return new HtmlResponse($frontend->document($request)->render());
+                    return new HtmlResponse($frontend->document($request)->render(), 200);
+                } catch (\Throwable) {
+                    return new HtmlResponse('<!DOCTYPE html><html><head><title>'.htmlspecialchars($forumTitle).'</title></head><body><div id="app"></div><div id="flarum"></div></body></html>', 200);
+                }
             }
 
             return $this->renderError(
@@ -155,7 +167,7 @@ class ShowCommunityRewindBladeController implements RequestHandlerInterface
                     return $url;
                 }
             }
-        } catch (Throwable) {
+        } catch (\Throwable) {
         }
 
         return $baseUrl !== '' ? "{$baseUrl}/assets/forum.css" : '/assets/forum.css';
